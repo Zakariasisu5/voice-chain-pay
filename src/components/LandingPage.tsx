@@ -83,26 +83,6 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-3/4 w-6 h-6 rounded-full gradient-primary opacity-20 animate-float" style={{ animationDelay: '5s' }} />
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 px-6 py-4 border-b border-border/50 backdrop-blur-sm bg-background/80">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-              <Coins className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold">Omnichain Payroll</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
-            <a href="#demo" className="text-muted-foreground hover:text-foreground transition-colors">Demo</a>
-            <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
-            <Button variant="outline">Connect Wallet</Button>
-            <Button className="gradient-primary text-white">
-              Launch App <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </nav>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section className="relative z-10 px-6 py-20">
