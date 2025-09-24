@@ -36,9 +36,6 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
               <Coins className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-semibold">Omnichain Payroll</span>
-            <Badge className="bg-accent text-accent-foreground text-xs">
-              ZetaChain
-            </Badge>
           </div>
 
           {/* Desktop Navigation */}
