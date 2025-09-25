@@ -105,9 +105,18 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground font-inter font-semibold;
     /* Dark theme by default like MeetMate */
     color-scheme: dark;
+  }
+
+  /* Make all text bold by default */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold;
+  }
+
+  p, span, div, button, input, textarea, label {
+    @apply font-semibold;
   }
 }
 

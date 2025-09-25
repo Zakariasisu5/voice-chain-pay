@@ -58,13 +58,15 @@ export default function ChatBot() {
   const [inputValue, setInputValue] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages]);
 
   const addMessage = (content: string, type: 'user' | 'bot', quickActions?: string[]) => {
@@ -160,7 +162,7 @@ export default function ChatBot() {
   const startVoiceRecording = () => {
     setIsListening(true);
     toast({
-      title: "Voice Recording Started",
+      title: "Voice Recording Started 🎤",
       description: "Listening for your command..."
     });
 
@@ -184,7 +186,7 @@ export default function ChatBot() {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full gradient-primary text-white shadow-glow z-50"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full gradient-primary text-white shadow-glow z-50 hover:shadow-xl transition-all duration-200"
         size="lg"
       >
         <MessageCircle className="w-6 h-6" />
@@ -193,12 +195,12 @@ export default function ChatBot() {
   }
 
   return (
-    <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col">
+    <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-2xl z-50 flex flex-col border-primary/20">
       <CardHeader className="pb-3 gradient-primary text-white rounded-t-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Bot className="w-5 h-5" />
-            <CardTitle className="text-lg">Payroll Assistant</CardTitle>
+            <CardTitle className="text-lg font-bold">Payroll Assistant</CardTitle>
           </div>
           <Button
             variant="ghost" 
@@ -209,42 +211,42 @@ export default function ChatBot() {
             <X className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center space-x-2 text-sm opacity-90">
+        <div className="flex items-center space-x-2 text-sm opacity-90 font-semibold">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           <span>Online • Voice-enabled</span>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col p-0">
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+        <ScrollArea className="flex-1 px-4 py-2 max-h-[400px]">
+          <div className="space-y-4 pr-2">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
+                <div className={`max-w-[85%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
                   <div className={`flex items-center space-x-2 mb-1 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {message.type === 'bot' ? (
                       <Bot className="w-4 h-4 text-primary" />
                     ) : (
                       <User className="w-4 h-4 text-muted-foreground" />
                     )}
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground font-semibold">
                       {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <div className={`p-3 rounded-lg whitespace-pre-line ${
+                  <div className={`p-3 rounded-lg whitespace-pre-line font-semibold shadow-sm ${
                     message.type === 'user' 
-                      ? 'bg-primary text-primary-foreground ml-8' 
-                      : 'bg-muted mr-8'
+                      ? 'bg-primary text-primary-foreground ml-6 shadow-glow' 
+                      : 'bg-muted mr-6 border border-border/50'
                   }`}>
                     {message.content}
                   </div>
                   {message.quickActions && (
-                    <div className="flex flex-wrap gap-2 mt-2 mr-8">
+                    <div className="flex flex-wrap gap-2 mt-2 mr-6">
                       {message.quickActions.map((action, index) => (
                         <Badge
                           key={index}
                           variant="outline"
-                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground text-xs"
+                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground text-xs font-semibold border-primary/30 hover:border-primary transition-all duration-200 hover:shadow-sm"
                           onClick={() => handleQuickAction(action)}
                         >
                           {action}
@@ -260,20 +262,21 @@ export default function ChatBot() {
               <div className="flex justify-start">
                 <div className="flex items-center space-x-2">
                   <Bot className="w-4 h-4 text-primary" />
-                  <div className="bg-muted p-3 rounded-lg">
+                  <div className="bg-muted p-3 rounded-lg border border-border/50">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
+                      <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
                     </div>
                   </div>
                 </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-border/50 bg-card/50">
           <div className="flex items-center space-x-2">
             <div className="flex-1 relative">
               <Input
@@ -281,39 +284,48 @@ export default function ChatBot() {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask about wallets, payouts, or use voice..."
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                className="pr-10"
+                className="pr-12 font-semibold border-border/50 focus:border-primary/50 bg-background/50"
               />
               <Button
                 variant="ghost"
                 size="sm"
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${isListening ? 'text-red-500 animate-pulse' : 'text-muted-foreground'}`}
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
+                  isListening 
+                    ? 'text-red-500 animate-pulse bg-red-500/10' 
+                    : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
+                }`}
                 onClick={startVoiceRecording}
                 disabled={isListening}
               >
                 {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </Button>
             </div>
-            <Button onClick={handleSendMessage} size="sm" className="gradient-primary text-white">
+            <Button 
+              onClick={handleSendMessage} 
+              size="sm" 
+              className="gradient-primary text-white shadow-glow hover:shadow-xl transition-shadow duration-200"
+              disabled={!inputValue.trim()}
+            >
               <Send className="w-4 h-4" />
             </Button>
           </div>
           
-          <div className="flex items-center justify-center mt-2 space-x-4 text-xs text-muted-foreground">
-            <div className="flex items-center space-x-1">
-              <Wallet className="w-3 h-3" />
-              <span>Wallet</span>
+          <div className="flex items-center justify-center mt-3 space-x-4 text-xs text-muted-foreground">
+            <div className="flex items-center space-x-1 px-2 py-1 rounded-md bg-primary/5 border border-primary/10">
+              <Wallet className="w-3 h-3 text-primary" />
+              <span className="font-semibold">Wallet</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <CreditCard className="w-3 h-3" />
-              <span>Payouts</span>
+            <div className="flex items-center space-x-1 px-2 py-1 rounded-md bg-accent/5 border border-accent/10">
+              <CreditCard className="w-3 h-3 text-accent" />
+              <span className="font-semibold">Payouts</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <Mic className="w-3 h-3" />
-              <span>Voice</span>
+            <div className="flex items-center space-x-1 px-2 py-1 rounded-md bg-green-500/5 border border-green-500/10">
+              <Mic className="w-3 h-3 text-green-500" />
+              <span className="font-semibold">Voice</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <HelpCircle className="w-3 h-3" />
-              <span>Help</span>
+            <div className="flex items-center space-x-1 px-2 py-1 rounded-md bg-blue-500/5 border border-blue-500/10">
+              <HelpCircle className="w-3 h-3 text-blue-500" />
+              <span className="font-semibold">Help</span>
             </div>
           </div>
         </div>
