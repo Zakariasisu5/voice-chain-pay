@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { WalletButton } from "@/components/WalletButton";
+import { LaunchAppButton } from "@/components/LaunchAppButton";
 import { 
   Coins, 
   LayoutDashboard, 
@@ -8,7 +10,6 @@ import {
   Users, 
   Menu, 
   X,
-  Wallet,
   Bell
 } from "lucide-react";
 
@@ -61,13 +62,8 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
             <Button variant="ghost" size="sm">
               <Bell className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
-              <Wallet className="w-4 h-4 mr-2" />
-              Connect Wallet
-            </Button>
-            <Button size="sm" className="gradient-primary text-white">
-              Launch App
-            </Button>
+            <WalletButton />
+            <LaunchAppButton onLaunch={() => onViewChange('contributor')} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -104,13 +100,14 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
                 </button>
               ))}
               <div className="pt-4 space-y-2">
-                <Button variant="outline" size="sm" className="w-full">
-                  <Wallet className="w-4 h-4 mr-2" />
-                  Connect Wallet
-                </Button>
-                <Button size="sm" className="w-full gradient-primary text-white">
-                  Launch App
-                </Button>
+                <WalletButton variant="outline" className="w-full" />
+                <LaunchAppButton 
+                  className="w-full gradient-primary text-white" 
+                  onLaunch={() => {
+                    onViewChange('contributor');
+                    setIsMobileMenuOpen(false);
+                  }} 
+                />
               </div>
             </div>
           </div>
