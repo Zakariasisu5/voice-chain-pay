@@ -1,0 +1,19 @@
+{
+  "name": "zenopay-smart-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network localhost",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.2.0",
+    "@openzeppelin/contracts": "^4.9.3",
+    "chai": "^6.0.1",
+    "dotenv": "^17.2.2",
+    "ethers": "^5.7.2",
+    "hardhat": "^2.17.0",
+    "mocha": "^11.7.2"
+  }
+}

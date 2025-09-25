@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRevealOnScroll } from "@/components/ui/use-in-view";
+import { ethers } from 'ethers';
+import { connectWallet, getBalance, shortenAddress, isMetaMaskAvailable } from '@/lib/wallet';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Wallet, Clock, Check, X, AlertCircle, Send, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { requestPayment, listenToEvents } from '@/lib/zenopay';
 
 interface PayoutRequest {
   id: string;
@@ -95,7 +99,37 @@ export default function ContributorDashboard() {
     wallet: '',
     description: ''
   });
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
+  const [walletChainId, setWalletChainId] = useState<number | undefined>(undefined);
+  const [connector, setConnector] = useState<'injected' | 'walletconnect'>('injected');
   const { toast } = useToast();
+  useRevealOnScroll();
+  const handleConnectWallet = async () => {
+    if (connector === 'injected' && !isMetaMaskAvailable()) {
+      toast({ title: 'No Injected Wallet Found', description: 'Install MetaMask or choose WalletConnect.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const w = await connectWallet(connector);
+      setWalletAddress(w.address);
+      setWalletBalance(w.balance);
+      setWalletChainId(w.chainId);
+      setIsWalletConnected(true);
+      toast({ title: 'Wallet Connected', description: `${shortenAddress(w.address)} • ${w.balance} ETH` });
+    } catch (err: any) {
+      toast({ title: 'Connection Error', description: err?.message || String(err), variant: 'destructive' });
+    }
+  };
+
+  const handleDisconnect = () => {
+    setIsWalletConnected(false);
+    setWalletAddress('');
+    setWalletBalance(undefined);
+    setWalletChainId(undefined);
+    toast({ title: 'Wallet Disconnected' });
+  };
 
   const handleSubmitRequest = () => {
     if (!payoutForm.amount || !payoutForm.token || !payoutForm.chain || !payoutForm.wallet) {
@@ -107,19 +141,87 @@ export default function ContributorDashboard() {
       return;
     }
 
-    toast({
-      title: "Payout Request Submitted",
-      description: `Request for ${payoutForm.amount} ${payoutForm.token} on ${payoutForm.chain} has been submitted for approval.`
-    });
+    // Validate wallet address format
+    const isValidEthAddress = /^0x[a-fA-F0-9]{40}$/.test(payoutForm.wallet);
+    const isValidBtcAddress = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(payoutForm.wallet);
+    
+    if (payoutForm.chain === 'Ethereum' && !isValidEthAddress) {
+      toast({
+        title: "Invalid Wallet Address",
+        description: "Please enter a valid Ethereum address (0x...)",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    setPayoutForm({
-      amount: '',
-      token: '',
-      chain: '',
-      wallet: '',
-      description: ''
-    });
+    if (payoutForm.chain === 'Bitcoin' && !isValidBtcAddress) {
+      toast({
+        title: "Invalid Wallet Address",
+        description: "Please enter a valid Bitcoin address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Call on-chain requestPayment (amount should be converted to wei for ETH-like tokens)
+    (async () => {
+      try {
+        const amountWei = ethers.utils.parseUnits(payoutForm.amount || '0', 18).toString();
+        const tx = await requestPayment(amountWei, 1, payoutForm.wallet); // targetChainId=1 as placeholder
+        toast({ title: 'Payout Request Submitted', description: `Tx sent: ${tx.hash}` });
+        setPayoutForm({ amount: '', token: '', chain: '', wallet: '', description: '' });
+      } catch (err: any) {
+        toast({ title: 'Error', description: err?.message || String(err), variant: 'destructive' });
+      }
+    })();
   };
+
+  // Listen to on-chain events to update UI in real-time
+  useEffect(() => {
+    const off = listenToEvents((data) => {
+      // PaymentRequested event
+      console.log('PaymentRequested', data);
+    }, (data) => {
+      console.log('PayoutSent', data);
+    }, (data) => {
+      console.log('VoiceApproved', data);
+    });
+    return () => off();
+  }, []);
+
+  // Wallet event listeners (accounts/chain changes)
+  useEffect(() => {
+    const provider: any = (typeof window !== 'undefined') ? (window as any).ethereum : null;
+    if (!provider) return;
+
+    const handleAccounts = async (accounts: string[]) => {
+      if (!accounts || accounts.length === 0) {
+        handleDisconnect();
+        return;
+      }
+      const address = accounts[0];
+      setWalletAddress(address);
+      try { setWalletBalance(await getBalance(address)); } catch (e) { /* ignore */ }
+      setIsWalletConnected(true);
+    };
+
+    const handleChain = async (chainHex: string) => {
+      try {
+        const chainId = parseInt(chainHex, 16);
+        setWalletChainId(chainId);
+      } catch (e) {
+        setWalletChainId(undefined);
+      }
+    };
+
+    provider.on && provider.on('accountsChanged', handleAccounts);
+    provider.on && provider.on('chainChanged', handleChain);
+
+    return () => {
+      provider.removeListener && provider.removeListener('accountsChanged', handleAccounts);
+      provider.removeListener && provider.removeListener('chainChanged', handleChain);
+    };
+  }, []);
 
   const totalUsdValue = mockBalances.reduce((sum, balance) => sum + parseFloat(balance.usdValue.replace(/,/g, '')), 0);
 
@@ -133,10 +235,34 @@ export default function ContributorDashboard() {
             <h1 className="text-3xl font-bold">Contributor Dashboard</h1>
             <p className="text-muted-foreground">Manage your payouts and track earnings across chains</p>
           </div>
-          <Button className="gradient-primary text-white">
-            <Wallet className="w-4 h-4 mr-2" />
-            Connect Wallet
-          </Button>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-muted/40 p-2 rounded-md">
+              <button
+                className={`text-sm px-3 py-1 rounded ${connector === 'injected' ? 'bg-primary text-white' : ''} ${!isMetaMaskAvailable() ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={() => isMetaMaskAvailable() && setConnector('injected')}
+                disabled={!isMetaMaskAvailable()}
+              >Injected</button>
+              <button className={`text-sm px-3 py-1 rounded ${connector === 'walletconnect' ? 'bg-primary text-white' : ''}`} onClick={() => setConnector('walletconnect')}>WalletConnect</button>
+            </div>
+            {!isWalletConnected ? (
+              <Button className="zeno-cta" onClick={handleConnectWallet}>
+                <Wallet className="w-4 h-4 mr-2" />
+                Connect Wallet
+              </Button>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <div className="px-3 py-2 bg-muted rounded-md text-sm flex items-center space-x-2">
+                  <span className="font-medium">{shortenAddress(walletAddress)}</span>
+                  <span className="text-xs text-muted-foreground">{walletBalance ? `${parseFloat(walletBalance).toFixed(4)} ETH` : ''}</span>
+                  <Badge variant="outline">{walletChainId ?? '—'}</Badge>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard?.writeText(walletAddress); toast({ title: 'Copied', description: 'Address copied to clipboard' }); }}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="destructive" onClick={handleDisconnect}>Disconnect</Button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Balance Overview */}
@@ -249,7 +375,7 @@ export default function ContributorDashboard() {
                 />
               </div>
 
-              <Button onClick={handleSubmitRequest} className="w-full gradient-primary text-white">
+              <Button onClick={handleSubmitRequest} className="w-full zeno-cta reveal">
                 Submit Request
               </Button>
             </CardContent>

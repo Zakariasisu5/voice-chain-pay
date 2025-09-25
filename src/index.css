@@ -1,47 +1,54 @@
+/* stylelint-disable at-rule-no-unknown */
+/* stylelint-disable at-rule-no-unknown, declaration-block-no-duplicate-properties */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* stylelint-enable at-rule-no-unknown, declaration-block-no-duplicate-properties */
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
 
+/* stylelint-disable at-rule-no-unknown */
 @layer base {
   :root {
-    /* MeetMate Colors - Dark Theme (Default) */
-    --background: 215 28% 8%; /* #0F1419 - deep navy */
-    --foreground: 0 0% 98%; /* White text */
+    /* ZenoPay Colors - Dark Theme */
+    /* Gradient background: #08203e -> #557c93  (HSL approximations) */
+    --background: 214 29% 14%; /* deep electric blue */
+    --foreground: 214 100% 86%; /* soft blue text (#B8D9FF) */
 
-    --card: 215 25% 10%; /* Slightly lighter than background */
-    --card-foreground: 0 0% 98%;
+    --card: 256 55% 20%; /* calm purple base for cards (darkened) */
+    --card-foreground: 214 100% 86%;
 
-    --popover: 215 25% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 256 55% 22%;
+    --popover-foreground: 214 100% 86%;
 
-    --primary: 20 100% 60%; /* #FF6B35 - MeetMate orange */
-    --primary-foreground: 0 0% 100%;
+    /* Primary accent: #377DFF */
+    --primary: 219 100% 61%;
+    --primary-foreground: 214 100% 98%;
 
-    --secondary: 215 20% 15%;
-    --secondary-foreground: 0 0% 98%;
+    /* Secondary/calm purple: #7A5ACF */
+    --secondary: 256 55% 58%;
+    --secondary-foreground: 214 100% 98%;
 
-    --muted: 215 20% 12%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 214 100% 12%;
+    --muted-foreground: 214 60% 70%;
 
-    --accent: 195 100% 50%; /* #00D4FF - light blue accent */
-    --accent-foreground: 215 28% 8%;
+    --accent: 256 55% 58%; /* reuse calm purple */
+    --accent-foreground: 214 100% 86%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 215 20% 18%;
-    --input: 215 20% 15%;
-    --ring: 20 100% 60%;
+    --border: 214 18% 18%;
+    --input: 214 18% 16%;
+    --ring: 219 100% 61%;
 
-    /* Custom tokens - MeetMate gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(20 100% 60%), hsl(45 100% 60%)); /* Orange to yellow */
-    --gradient-subtle: linear-gradient(180deg, hsl(215 28% 8%), hsl(215 20% 12%));
-    --shadow-glow: 0 0 40px hsl(20 100% 60% / 0.4);
-    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+    /* Custom tokens - ZenoPay gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(214 29% 14%), hsl(203 27% 46%)); /* hero gradient */
+    --gradient-hero-soft: linear-gradient(180deg, hsl(214 29% 14% / 0.9), hsl(203 27% 46% / 0.85));
+    --shadow-glow: 0 0 48px hsl(219 100% 61% / 0.24);
+    --shadow-card: 0 6px 28px hsl(214 8% 8% / 0.48);
     --animation-float: float 6s ease-in-out infinite;
     --animation-slide-right: slideRight 20s linear infinite;
     --animation-slide-left: slideLeft 25s linear infinite;
@@ -69,7 +76,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 20%;
 
-    --primary: 24 100% 52%; /* #FF6B00 vibrant orange */
+  --primary: 219 100% 61%; /* vivid blue */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 10%; /* #1A1A1A deep charcoal */
@@ -101,15 +108,20 @@ All colors MUST be HSL.
 
 @layer base {
   * {
+    /* stylelint-disable declaration-block-no-duplicate-properties */
     @apply border-border;
+    /* stylelint-enable declaration-block-no-duplicate-properties */
   }
 
   body {
+    /* stylelint-disable declaration-block-no-duplicate-properties */
     @apply bg-background text-foreground font-inter;
     /* Dark theme by default like MeetMate */
     color-scheme: dark;
+    /* stylelint-enable declaration-block-no-duplicate-properties */
   }
 }
+/* stylelint-enable at-rule-no-unknown */
 
 @layer utilities {
   /* Animations */
@@ -139,6 +151,41 @@ All colors MUST be HSL.
   .animate-slide-left {
     animation: var(--animation-slide-left);
   }
+
+  /* Reveal utilities for intersection-based animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px) scale(0.995);
+    transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .reveal-from-left {
+    opacity: 0;
+    transform: translateX(-18px) rotate(-1deg);
+    transition: opacity 460ms cubic-bezier(.2,.9,.2,1), transform 460ms cubic-bezier(.2,.9,.2,1);
+  }
+
+  .reveal-from-left.revealed {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
+
+  .reveal-from-right {
+    opacity: 0;
+    transform: translateX(18px) rotate(1deg);
+    transition: opacity 460ms cubic-bezier(.2,.9,.2,1), transform 460ms cubic-bezier(.2,.9,.2,1);
+  }
+
+  .reveal-from-right.revealed {
+    opacity: 1;
+    transform: translateX(0) rotate(0deg);
+  }
   
   .gradient-primary {
     background: var(--gradient-primary);
@@ -154,5 +201,97 @@ All colors MUST be HSL.
   
   .shadow-card {
     box-shadow: var(--shadow-card);
+  }
+
+  /* ZenoPay specific utilities */
+  .zeno-hero {
+    background: var(--gradient-hero-soft);
+    background-blend-mode: overlay;
+    color: hsl(var(--foreground));
+    position: relative;
+    overflow: hidden;
+  }
+
+  .zeno-cta {
+    background-color: hsl(var(--primary));
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 0.6rem;
+    box-shadow: 0 8px 24px hsl(var(--primary) / 0.12);
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+  }
+
+  .zeno-cta:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.05);
+  }
+
+  .zeno-card {
+    background: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .zeno-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+  }
+
+  .zeno-testimonial {
+    background: linear-gradient(180deg, rgba(122,90,207,0.06), rgba(55,125,255,0.03));
+    border-radius: 0.6rem;
+    padding: 1rem;
+    color: hsl(var(--foreground));
+  }
+
+  .zeno-marquee {
+    color: hsl(var(--foreground));
+    opacity: 0.9;
+  }
+
+  .zeno-chat-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-top-left-radius: 0.6rem;
+    border-top-right-radius: 0.6rem;
+  }
+
+  .zeno-chat-bubble {
+    background: rgba(184,217,255,0.06); /* soft blue text bubble */
+    color: #B8D9FF;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  /* styled scrollbar for chat areas */
+  .zeno-scroll::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .zeno-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .zeno-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.8), hsl(var(--secondary) / 0.8));
+    border-radius: 999px;
+    border: 2px solid rgba(0,0,0,0.12);
+  }
+
+  /* cross-browser fallback: make sure overflow shows a scrollbar when needed */
+  .zeno-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary)) transparent;
+  }
+
+  /* accessible focus ring for interactive elements */
+  :focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(55,125,255,0.16);
+    border-radius: 6px;
   }
 }

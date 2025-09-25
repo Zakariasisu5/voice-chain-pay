@@ -1,9 +1,11 @@
 import { useState } from "react";
+import useInView, { useRevealOnScroll } from "@/components/ui/use-in-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Coins, Shield, Zap, Users, ChevronRight, Star, Play } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
+import { useToast } from "@/hooks/use-toast";
 
 const FloatingBubble = ({ delay = 0, size = "w-8 h-8" }: { delay?: number; size?: string }) => (
   <div 
@@ -68,6 +70,39 @@ const features = [
 
 export default function LandingPage() {
   const [selectedDemo, setSelectedDemo] = useState("contributor");
+  const { toast } = useToast();
+  useRevealOnScroll();
+
+  const handleLaunchApp = () => {
+    toast({
+      title: "Welcome to ZenoPay!",
+      description: "Redirecting to the dashboard...",
+    });
+    // In a real app, this would redirect to the main dashboard
+    setTimeout(() => {
+      window.location.href = "#contributor";
+    }, 1000);
+  };
+
+  const handleLearnMore = () => {
+    toast({
+      title: "Learn More",
+      description: "Scroll down to explore our features and testimonials!",
+    });
+    // Smooth scroll to features section
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleStartTrial = () => {
+    toast({
+      title: "Free Trial Started!",
+      description: "Welcome to ZenoPay. You can now access all features.",
+    });
+    // In a real app, this would start a trial period
+    setTimeout(() => {
+      window.location.href = "#contributor";
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen">
@@ -84,29 +119,28 @@ export default function LandingPage() {
       </div>
 
 
-      {/* Hero Section */}
-      <section className="relative z-10 px-6 py-20">
+  {/* Hero Section */}
+  <section className="relative z-10 px-6 py-20 zeno-hero">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <Badge className="bg-accent text-accent-foreground">
-                🚀 Now live on ZetaChain Mainnet
-              </Badge>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                Cross-Chain Payroll 
-                <span className="text-primary"> Made Simple</span>
+              {/* hero content reveal */}
+              <div ref={(null as any)} />
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight reveal reveal-from-left">
+                <span className="text-primary"> Cross-Chain Made Simple</span>
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
+              <p className="text-xl text-muted-foreground leading-relaxed reveal">
                 Enable DAOs and remote teams to pay contributors across multiple chains 
-                from a single treasury with voice-enabled admin approvals.
+                from a single treasury with AI-powered voice approvals.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="gradient-primary text-white shadow-glow">
-                  <Play className="w-5 h-5 mr-2" />
-                  Watch Demo
+              <div className="flex flex-col sm:flex-row gap-4 reveal">
+                <Button size="lg" className="zeno-cta" onClick={handleLaunchApp}>
+                  <Play className="w-4 h-4 mr-2" />
+                  Launch App
                 </Button>
-                <Button size="lg" variant="outline">
-                  Connect Wallet
+                <Button size="lg" variant="outline" onClick={handleLearnMore} className="hover:bg-primary/10">
+                  <ChevronRight className="w-4 h-4 mr-2" />
+                  Learn More
                 </Button>
               </div>
               <div className="flex items-center space-x-6 text-sm text-muted-foreground">
@@ -120,11 +154,13 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative reveal reveal-from-right">
               <img 
                 src={heroImage} 
                 alt="Cross-chain payments visualization" 
                 className="w-full h-auto rounded-2xl shadow-card"
+                data-debug-src={heroImage}
+                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/placeholder.svg'; (e.currentTarget as HTMLImageElement).style.opacity = '1'; }}
               />
             </div>
           </div>
@@ -142,7 +178,7 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="shadow-card hover:shadow-glow transition-shadow duration-300">
+              <Card key={index} className={`shadow-card hover:shadow-glow transition-shadow duration-300 reveal`} style={{ transitionDelay: `${index * 60}ms` }}>
                 <CardContent className="p-6 text-center space-y-4">
                   <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mx-auto">
                     <feature.icon className="w-6 h-6 text-white" />
@@ -166,9 +202,9 @@ export default function LandingPage() {
         </div>
         
         <div className="relative">
-          <div className="flex animate-slide-right space-x-8">
+          <div className="flex space-x-8">
             {[...testimonials, ...testimonials].map((testimonial, index) => (
-              <Card key={index} className="flex-shrink-0 w-96 shadow-card">
+              <Card key={index} className={`flex-shrink-0 w-96 shadow-card reveal`} style={{ transitionDelay: `${index * 80}ms` }}>
                 <CardContent className="p-6 space-y-4">
                   <div className="flex items-center space-x-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -213,14 +249,11 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <h2 className="text-4xl font-bold">Ready to Transform Your Payroll?</h2>
           <p className="text-xl opacity-90">
-            Join hundreds of DAOs already using Omnichain Payroll for seamless cross-chain payments
+            Join hundreds of DAOs already using ZenoPay for seamless cross-chain payments
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary">
+            <Button size="lg" variant="secondary" onClick={handleStartTrial}>
               Start Free Trial
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-              Schedule Demo
             </Button>
           </div>
         </div>
@@ -229,7 +262,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 px-6 py-12 border-t border-border/50">
         <div className="max-w-7xl mx-auto text-center text-muted-foreground">
-          <p>&copy; 2024 Omnichain Payroll DAO. Built on ZetaChain.</p>
+          <p>&copy; 2025 ZenoPay DAO. Built on ZetaChain.</p>
         </div>
       </footer>
     </div>

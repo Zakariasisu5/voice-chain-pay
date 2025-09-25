@@ -1,73 +1,131 @@
-# Welcome to your Lovable project
+# ZenoPay
 
-## Project info
+A modern, AI-powered cross-chain payroll system built for DAOs and remote teams. ZenoPay enables seamless payments across multiple blockchain networks with intelligent voice-controlled admin approvals powered by Zeno AI.
 
-**URL**: https://lovable.dev/projects/96c5ab45-38d9-4d77-adb1-d771d09e3ede
+## Features
 
-## How can I edit this code?
+### 🚀 Core Features
+- **Multi-Chain Payments**: Support for ETH, BTC, USDC, and other tokens across Ethereum, Bitcoin, Polygon, Arbitrum, and more
+- **AI-Powered Voice Commands**: Approve high-value payments using intelligent voice recognition with complete audit trails
+- **DAO-Native Design**: Built specifically for decentralized organizations with multi-sig support
+- **Real-time Dashboard**: Track balances, pending requests, and transaction history across all chains
+- **Smart Contract Integration**: Gas-optimized transactions with ZetaChain omnichain messaging
 
-There are several ways of editing your application.
+### 🎯 User Interfaces
+- **Landing Page**: Modern, animated homepage with feature showcase and testimonials
+- **Contributor Dashboard**: Request payouts, track earnings, and manage wallet connections
+- **Admin Panel**: Approve/reject requests, monitor treasury, and manage voice commands
+- **Zeno AI Assistant**: Intelligent chatbot with context-aware responses, voice commands, and smart suggestions
 
-**Use Lovable**
+### 🔧 Technical Stack
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI Components**: Radix UI + Tailwind CSS + shadcn/ui
+- **State Management**: React Query for server state
+- **Routing**: React Router DOM
+- **Styling**: Tailwind CSS with custom design system
+- **Icons**: Lucide React
+- **Notifications**: Sonner + React Hot Toast
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/96c5ab45-38d9-4d77-adb1-d771d09e3ede) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
 
-**Use your preferred IDE**
+### Installation
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd zenopay
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Install dependencies:
+```bash
+npm install
+```
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+4. Open your browser and navigate to `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Available Scripts
 
-**Use GitHub Codespaces**
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project Structure
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # React components
+│   ├── ui/             # Reusable UI components (shadcn/ui)
+│   ├── LandingPage.tsx # Homepage with features and testimonials
+│   ├── AdminPanel.tsx  # Admin interface for managing payouts
+│   ├── ContributorDashboard.tsx # Contributor interface
+│   ├── Navigation.tsx  # Main navigation component
+│   └── ChatBot.tsx     # AI assistant chatbot
+├── pages/              # Page components
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+└── assets/             # Static assets
+```
 
-This project is built with:
+## Key Features Explained
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Zeno AI Assistant
+The intelligent chatbot provides context-aware assistance with:
+- **Smart Responses**: AI-powered understanding of user intent
+- **Voice Commands**: Natural language processing for payment approvals
+- **Suggestions**: Proactive help with relevant questions and actions
+- **Multi-modal Interface**: Text and voice interaction capabilities
 
-## How can I deploy this project?
+### Multi-Chain Support
+The system supports payments across multiple blockchain networks:
+- **Ethereum**: ETH, ERC-20 tokens
+- **Bitcoin**: BTC payments
+- **Polygon**: USDC, MATIC
+- **Arbitrum**: ARB tokens
+- **Optimism**: OP tokens
 
-Simply open [Lovable](https://lovable.dev/projects/96c5ab45-38d9-4d77-adb1-d771d09e3ede) and click on Share -> Publish.
+### Wallet Integration
+- Connect multiple wallet types (MetaMask, WalletConnect, etc.)
+- Address validation for different chain formats
+- Real-time balance tracking across chains
 
-## Can I connect a custom domain to my Lovable project?
+## Design System
 
-Yes, you can!
+The application uses a custom design system with:
+- **Dark Theme**: Default dark mode with navy backgrounds
+- **Primary Colors**: Orange gradient (#FF6B35 to #FFD700)
+- **Typography**: Inter font family
+- **Animations**: Floating bubbles, sliding carousels, smooth transitions
+- **Shadows**: Glow effects and card shadows
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Contributing
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -m 'Add feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support and questions:
+- Open an issue on GitHub
+- Use the built-in chatbot for assistance
+- Check the documentation in the `/docs` folder
+
+---
+
+Built with ❤️ and powered by Zeno AI for the decentralized future of work.

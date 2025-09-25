@@ -11,6 +11,7 @@ import {
   Wallet,
   Bell
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   currentView: string;
@@ -19,6 +20,30 @@ interface NavigationProps {
 
 export default function Navigation({ currentView, onViewChange }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleConnectWallet = () => {
+    toast({
+      title: "Wallet Connection",
+      description: "Connecting to your wallet... (Demo mode)",
+    });
+    // In a real app, this would trigger wallet connection
+  };
+
+  const handleLaunchApp = () => {
+    toast({
+      title: "Launching App",
+      description: "Redirecting to the main dashboard...",
+    });
+    onViewChange('contributor');
+  };
+
+  const handleNotifications = () => {
+    toast({
+      title: "Notifications",
+      description: "You have 3 new notifications",
+    });
+  };
 
   const navItems = [
     { id: 'landing', label: 'Home', icon: Coins },
@@ -35,7 +60,7 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
             <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
               <Coins className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-semibold">Omnichain Payroll</span>
+            <span className="text-xl font-semibold">ZenoPay</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -58,14 +83,14 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={handleNotifications}>
               <Bell className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleConnectWallet}>
               <Wallet className="w-4 h-4 mr-2" />
               Connect Wallet
             </Button>
-            <Button size="sm" className="gradient-primary text-white">
+            <Button size="sm" className="gradient-primary text-white" onClick={handleLaunchApp}>
               Launch App
             </Button>
           </div>
@@ -104,11 +129,11 @@ export default function Navigation({ currentView, onViewChange }: NavigationProp
                 </button>
               ))}
               <div className="pt-4 space-y-2">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full" onClick={handleConnectWallet}>
                   <Wallet className="w-4 h-4 mr-2" />
                   Connect Wallet
                 </Button>
-                <Button size="sm" className="w-full gradient-primary text-white">
+                <Button size="sm" className="w-full gradient-primary text-white" onClick={handleLaunchApp}>
                   Launch App
                 </Button>
               </div>

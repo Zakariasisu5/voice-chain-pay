@@ -26,6 +26,9 @@ import {
   Activity
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { parseApprovalCommand } from '@/lib/voice';
+import { approvePayment, logVoiceApproval } from '@/lib/zenopay';
+import { useRevealOnScroll } from "@/components/ui/use-in-view";
 
 interface PendingRequest {
   id: string;
@@ -143,21 +146,46 @@ export default function AdminPanel() {
   const [voiceRecording, setVoiceRecording] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  useRevealOnScroll();
 
   const handleApprove = (requestId: string, voiceCommand?: string) => {
+    setIsProcessing(true);
     toast({
-      title: "Payment Approved",
-      description: `Request ${requestId} has been approved and submitted to blockchain.`,
+      title: "Processing Approval",
+      description: `Approving request ${requestId}...`,
     });
+    (async () => {
+      try {
+        const tx = await approvePayment(Number(requestId.replace(/[^0-9]/g, '')));
+        toast({ title: 'Payment Approved', description: `Tx: ${tx.hash}` });
+        if (voiceCommand) {
+          await logVoiceApproval(Number(requestId.replace(/[^0-9]/g, '')), voiceCommand);
+        }
+      } catch (err: any) {
+        toast({ title: 'Error', description: err?.message || String(err), variant: 'destructive' });
+      } finally {
+        setIsProcessing(false);
+      }
+    })();
   };
 
   const handleReject = (requestId: string, reason?: string) => {
+    setIsProcessing(true);
     toast({
-      title: "Payment Rejected", 
-      description: `Request ${requestId} has been rejected.`,
-      variant: "destructive"
+      title: "Processing Rejection",
+      description: `Rejecting request ${requestId}...`,
     });
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      toast({
+        title: "Payment Rejected", 
+        description: `Request ${requestId} has been rejected.`,
+        variant: "destructive"
+      });
+    }, 1000);
   };
 
   const toggleVoiceRecording = () => {
@@ -167,6 +195,26 @@ export default function AdminPanel() {
         title: "Voice Recording Started",
         description: "Listening for approval commands...",
       });
+      // Simulate voice recognition after 3 seconds
+      setTimeout(() => {
+        setVoiceRecording(false);
+        const transcript = "Approve 0.1 BTC to Alice Johnson";
+        toast({ title: "Voice Command Detected", description: `Processing: '${transcript}'` });
+        const parsed = parseApprovalCommand(transcript);
+        if (parsed) {
+          // Map recipient name to request id in demo
+          const recipientKey = parsed.recipient.toLowerCase();
+          let requestId = 'REQ-003';
+          if (recipientKey.includes('bob')) requestId = 'REQ-004';
+          if (recipientKey.includes('carol')) requestId = 'REQ-005';
+          // Auto-approve with transcript
+          setTimeout(() => {
+            handleApprove(requestId, transcript);
+          }, 1000);
+        } else {
+          toast({ title: 'Could not parse voice command', variant: 'destructive' });
+        }
+      }, 3000);
     } else {
       toast({
         title: "Voice Recording Stopped",
@@ -184,7 +232,8 @@ export default function AdminPanel() {
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="zeno-card p-4 rounded-lg reveal">
+          <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Admin Panel</h1>
             <p className="text-muted-foreground">Manage treasury, approve payouts, and monitor activity</p>
@@ -198,16 +247,17 @@ export default function AdminPanel() {
               {voiceRecording ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
               {voiceRecording ? "Stop Recording" : "Voice Commands"}
             </Button>
-            <Button className="gradient-primary text-white">
+            <Button className="zeno-cta">
               <Shield className="w-4 h-4 mr-2" />
               Multi-Sig Wallet
             </Button>
+          </div>
           </div>
         </div>
 
         {/* Stats Overview */}
         <div className="grid md:grid-cols-4 gap-6">
-          <Card className="shadow-card">
+          <Card className="shadow-card reveal">
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
                 <DollarSign className="w-8 h-8 text-primary" />
@@ -219,7 +269,7 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
           
-          <Card className="shadow-card">
+          <Card className="shadow-card reveal">
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
                 <Clock className="w-8 h-8 text-yellow-500" />
@@ -231,7 +281,7 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card">
+          <Card className="shadow-card reveal">
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
                 <Users className="w-8 h-8 text-blue-500" />
@@ -243,7 +293,7 @@ export default function AdminPanel() {
             </CardContent>
           </Card>
 
-          <Card className="shadow-card">
+          <Card className="shadow-card reveal">
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-8 h-8 text-green-500" />
@@ -265,7 +315,7 @@ export default function AdminPanel() {
 
           {/* Pending Requests Tab */}
           <TabsContent value="pending" className="space-y-6">
-            <Card className="shadow-card">
+            <Card className="shadow-card reveal">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Pending Payout Requests</CardTitle>
@@ -309,7 +359,7 @@ export default function AdminPanel() {
                   </TableHeader>
                   <TableBody>
                     {mockPendingRequests.map((request) => (
-                      <TableRow key={request.id}>
+                      <TableRow key={request.id} className="reveal">
                         <TableCell className="font-medium">{request.contributor}</TableCell>
                         <TableCell>
                           <div>
@@ -331,6 +381,7 @@ export default function AdminPanel() {
                               size="sm" 
                               className="bg-green-500 hover:bg-green-600 text-white"
                               onClick={() => handleApprove(request.id)}
+                              disabled={isProcessing}
                             >
                               <Check className="w-4 h-4" />
                             </Button>
@@ -338,6 +389,7 @@ export default function AdminPanel() {
                               size="sm" 
                               variant="destructive"
                               onClick={() => handleReject(request.id)}
+                              disabled={isProcessing}
                             >
                               <X className="w-4 h-4" />
                             </Button>
