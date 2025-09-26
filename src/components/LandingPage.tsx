@@ -202,10 +202,11 @@ export default function LandingPage() {
         </div>
         
         <div className="relative">
-          <div className="flex space-x-8">
-            {[...testimonials, ...testimonials].map((testimonial, index) => (
-              <Card key={index} className={`flex-shrink-0 w-96 shadow-card reveal`} style={{ transitionDelay: `${index * 80}ms` }}>
-                <CardContent className="p-6 space-y-4">
+          <div className="overflow-hidden">
+            <div className="flex items-center animate-slide-left space-x-8">
+              {[...testimonials, ...testimonials].map((testimonial, index) => (
+                <Card key={index} className={`flex-shrink-0 w-96 shadow-card reveal`} style={{ transitionDelay: `${index * 80}ms` }}>
+                  <CardContent className="p-6 space-y-4">
                   <div className="flex items-center space-x-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-primary text-primary" />

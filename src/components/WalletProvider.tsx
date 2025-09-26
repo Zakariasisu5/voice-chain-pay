@@ -21,11 +21,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         const cfg = await loadWalletConfig()
         if (cfg) {
           if (mounted) setWagmiConfig(cfg)
-          try {
+            try {
             if (!__HAS_WEB3MODAL__) throw new Error('no web3modal')
-            // Use runtime import via new Function to avoid Vite import-analysis
+            // Guarded dynamic import — bundlers can drop this when package absent
             // @ts-ignore
-            const web3modal = await (new Function('return import("@web3modal/wagmi")'))()
+            const web3modal = await import('@web3modal/wagmi')
             const createWeb3Modal = (web3modal as any).createWeb3Modal || (web3modal as any).default?.createWeb3Modal
             if (mounted && typeof createWeb3Modal === 'function') {
               createWeb3Modal({ wagmiConfig: cfg, projectId, enableAnalytics: true, enableOnramp: true })
@@ -42,10 +42,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       try {
         // Dynamically import wagmi provider if present
-  // Use runtime import to avoid Vite import-analysis
+  // Guarded dynamic import
   if (!__HAS_WAGMI__) throw new Error('no wagmi')
   // @ts-ignore
-  const wagmiMod = await (new Function('return import("wagmi")'))()
+  const wagmiMod = await import('wagmi')
         const Candidate = (wagmiMod as any).WagmiProvider || (wagmiMod as any).WagmiConfig || null
         if (mounted && Candidate) setWagmiProviderComp(() => Candidate)
       } catch (err) {

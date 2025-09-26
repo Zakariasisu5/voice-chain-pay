@@ -20,11 +20,11 @@ export function useWallet() {
       try {
         if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) throw new Error('optional wallet libs not present')
 
-        // Avoid Vite import-analysis by importing at runtime via new Function
-        // @ts-ignore
-        const wagmi = await (new Function('return import("wagmi")'))()
-        // @ts-ignore
-        const web3modal = await (new Function('return import("@web3modal/wagmi/react")'))()
+  // Guarded dynamic imports — bundlers can drop these branches when packages are not present
+  // @ts-ignore
+  const wagmi = await import('wagmi')
+  // @ts-ignore
+  const web3modal = await import('@web3modal/wagmi/react')
 
         if (!mounted) return
 

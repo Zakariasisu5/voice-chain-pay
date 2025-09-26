@@ -11,13 +11,14 @@ export async function loadWalletConfig() {
     if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
       throw new Error('Optional packages not installed')
     }
-    // Dynamically import optional packages using new Function to avoid Vite import-analysis
+    // Use guarded dynamic imports. The build flags (__HAS_WAGMI__/__HAS_WEB3MODAL__)
+    // allow bundlers to tree-shake these branches when packages are absent.
     // @ts-ignore
-    const { defaultWagmiConfig } = await (new Function('return import("@web3modal/wagmi/react/config")'))()
+    const { defaultWagmiConfig } = await import('@web3modal/wagmi/react/config')
     // @ts-ignore
-    const { cookieStorage, createStorage } = await (new Function('return import("wagmi")'))()
+    const { cookieStorage, createStorage } = await import('wagmi')
     // @ts-ignore
-    const chainsMod = await (new Function('return import("wagmi/chains")'))()
+    const chainsMod = await import('wagmi/chains')
     const { mainnet, arbitrum, optimism, polygon, base, bsc, avalanche } = chainsMod
 
     const metadata = {

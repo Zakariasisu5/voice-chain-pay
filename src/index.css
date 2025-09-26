@@ -248,6 +248,19 @@ All colors MUST be HSL.
     color: hsl(var(--foreground));
   }
 
+  /* Testimonials marquee: continuous right-to-left queue */
+  .zeno-testimonials-outer {
+    overflow: hidden;
+  }
+
+  .zeno-testimonials-inner {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    /* use the same slideLeft keyframes but faster for testimonials */
+    animation: slideLeft 22s linear infinite;
+  }
+
   .zeno-marquee {
     color: hsl(var(--foreground));
     opacity: 0.9;
