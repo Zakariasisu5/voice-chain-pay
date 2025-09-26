@@ -3,7 +3,6 @@ console.log('--- build-env ---');
 console.log('node version:', version);
 console.log('platform:', platform);
 console.log('arch:', arch);
-//
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..');
