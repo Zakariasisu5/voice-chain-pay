@@ -11,12 +11,9 @@ export async function loadWalletConfig() {
       return null
     }
     
-    // Use guarded dynamic imports
-    // @ts-ignore
+    // Use guarded dynamic imports with proper error handling
     const { defaultWagmiConfig } = await import('@web3modal/wagmi/react/config')
-    // @ts-ignore
     const { cookieStorage, createStorage } = await import('wagmi')
-    // @ts-ignore
     const chainsMod = await import('wagmi/chains')
     
     const { 

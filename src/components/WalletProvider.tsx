@@ -23,10 +23,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           
           // Initialize Web3Modal with enhanced configuration
           try {
-            if (!__HAS_WEB3MODAL__) throw new Error('Web3Modal not available')
-            // @ts-ignore
+            if (!__HAS_WEB3MODAL__) {
+              console.warn('Web3Modal not available')
+              return
+            }
+            
             const web3modal = await import('@web3modal/wagmi')
-            const createWeb3Modal = (web3modal as any).createWeb3Modal || (web3modal as any).default?.createWeb3Modal
+            const createWeb3Modal = web3modal.createWeb3Modal || web3modal.default?.createWeb3Modal
             
             if (mounted && typeof createWeb3Modal === 'function') {
               createWeb3Modal({ 
@@ -49,6 +52,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
                   '38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662'  // Bitget
                 ]
               })
+              console.log('Web3Modal initialized successfully')
             }
           } catch (e) {
             console.warn('Web3Modal initialization failed:', e)
@@ -60,13 +64,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       try {
         // Load Wagmi Provider component
-        if (!__HAS_WAGMI__) throw new Error('no wagmi')
-        // @ts-ignore
+        if (!__HAS_WAGMI__) {
+          console.warn('Wagmi not available')
+          if (mounted) setIsInitialized(true)
+          return
+        }
+        
         const wagmiMod = await import('wagmi')
-        const Candidate = (wagmiMod as any).WagmiProvider || (wagmiMod as any).WagmiConfig || null
+        const Candidate = wagmiMod.WagmiProvider || wagmiMod.WagmiConfig || null
         if (mounted && Candidate) {
           setWagmiProviderComp(() => Candidate)
           setIsInitialized(true)
+          console.log('Wagmi Provider loaded successfully')
         }
       } catch (err) {
         console.warn('Wagmi provider loading failed:', err)

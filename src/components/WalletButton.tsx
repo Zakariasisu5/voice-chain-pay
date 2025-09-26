@@ -1,8 +1,10 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Wallet, LogOut, ChevronDown, AlertCircle } from "lucide-react"
 import { useWallet } from "@/hooks/useWallet"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { WalletSelection } from "@/components/WalletSelection"
 
 interface WalletButtonProps {
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
@@ -11,6 +13,7 @@ interface WalletButtonProps {
 }
 
 export function WalletButton({ variant = "outline", size = "sm", className }: WalletButtonProps) {
+  const [showWalletSelection, setShowWalletSelection] = useState(false)
   const { 
     isConnected, 
     isConnecting, 
@@ -24,6 +27,11 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
   const { toast } = useToast()
 
   const handleConnect = async () => {
+    if (!hooksLoaded) {
+      setShowWalletSelection(true)
+      return
+    }
+    
     try {
       await connectWallet()
     } catch (error) {
@@ -54,15 +62,21 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
   // Show loading state while wallet system initializes
   if (!hooksLoaded) {
     return (
-      <Button 
-        variant="secondary" 
-        size={size}
-        disabled
-        className={className}
-      >
-        <AlertCircle className="w-4 h-4 mr-2 text-muted-foreground" />
-        <span className="text-muted-foreground">Wallet Unavailable</span>
-      </Button>
+      <>
+        <Button 
+          variant={variant} 
+          size={size}
+          onClick={() => setShowWalletSelection(true)}
+          className={className}
+        >
+          <Wallet className="w-4 h-4 mr-2" />
+          Connect Wallet
+        </Button>
+        <WalletSelection 
+          isOpen={showWalletSelection} 
+          onClose={() => setShowWalletSelection(false)} 
+        />
+      </>
     )
   }
 

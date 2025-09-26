@@ -1,26 +1,36 @@
-// Enhanced wallet hook that uses wagmi hooks properly
 import { useCallback, useMemo } from 'react'
 
-// Conditional hook imports - only use if available
-let wagmiHooks: any = null
-let web3modalHooks: any = null
-
-if (__HAS_WAGMI__ && __HAS_WEB3MODAL__) {
-  try {
-    // @ts-ignore
-    wagmiHooks = require('wagmi')
-    // @ts-ignore  
-    web3modalHooks = require('@web3modal/wagmi/react')
-  } catch (e) {
-    console.warn('Failed to load optional wallet dependencies')
-  }
-}
-
+// Enhanced wallet hook that properly uses wagmi hooks
 export function useWallet() {
-  // If wagmi is available, use the hooks directly
-  if (wagmiHooks && web3modalHooks) {
-    const { useAccount, useDisconnect } = wagmiHooks
-    const { useWeb3Modal } = web3modalHooks
+  // Check if optional wallet libraries are available
+  if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
+    // Fallback when wagmi is not available
+    return {
+      address: null,
+      isConnected: false,
+      isConnecting: false, 
+      isDisconnected: true,
+      chainId: null,
+      chainName: 'Unknown',
+      connector: null,
+      connectWallet: async () => {
+        console.warn('Wallet functionality not available - wagmi not installed')
+      },
+      disconnectWallet: async () => {
+        console.warn('Wallet functionality not available - wagmi not installed')
+      },
+      formatAddress: '',
+      hooksLoaded: false
+    }
+  }
+
+  try {
+    // Dynamic imports with proper error handling
+    const wagmi = require('wagmi')
+    const web3modal = require('@web3modal/wagmi/react')
+    
+    const { useAccount, useDisconnect } = wagmi
+    const { useWeb3Modal } = web3modal
     
     const account = useAccount()
     const { disconnect } = useDisconnect()
@@ -78,24 +88,25 @@ export function useWallet() {
       formatAddress,
       hooksLoaded: true
     }
-  }
-
-  // Fallback when wagmi is not available
-  return {
-    address: null,
-    isConnected: false,
-    isConnecting: false, 
-    isDisconnected: true,
-    chainId: null,
-    chainName: 'Unknown',
-    connector: null,
-    connectWallet: async () => {
-      console.warn('Wallet functionality not available - wagmi not installed')
-    },
-    disconnectWallet: async () => {
-      console.warn('Wallet functionality not available - wagmi not installed')
-    },
-    formatAddress: '',
-    hooksLoaded: false
+  } catch (error) {
+    console.warn('Error using wagmi hooks:', error)
+    // Fallback when there are issues with the hooks
+    return {
+      address: null,
+      isConnected: false,
+      isConnecting: false, 
+      isDisconnected: true,
+      chainId: null,
+      chainName: 'Unknown',
+      connector: null,
+      connectWallet: async () => {
+        console.warn('Wallet functionality not available due to error')
+      },
+      disconnectWallet: async () => {
+        console.warn('Wallet functionality not available due to error')
+      },
+      formatAddress: '',
+      hooksLoaded: false
+    }
   }
 }
