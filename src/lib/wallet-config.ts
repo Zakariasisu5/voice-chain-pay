@@ -7,7 +7,8 @@ export const projectId = '47da30d2f5ed7d2c5a1b8a3f8c6e4d9f'
 export async function loadWalletConfig() {
   try {
     if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
-      throw new Error('Optional packages not installed')
+      console.warn('Optional wallet packages not available')
+      return null
     }
     
     // Use guarded dynamic imports

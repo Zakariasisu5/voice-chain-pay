@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Wallet, LogOut, ChevronDown } from "lucide-react"
+import { Wallet, LogOut, ChevronDown, AlertCircle } from "lucide-react"
 import { useWallet } from "@/hooks/useWallet"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
@@ -39,7 +39,7 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
     try {
       await disconnectWallet()
       toast({
-        title: "Wallet Disconnected",
+        title: "Wallet Disconnected", 
         description: "Your wallet has been disconnected successfully.",
       })
     } catch (error) {
@@ -51,16 +51,17 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
     }
   }
 
+  // Show loading state while wallet system initializes
   if (!hooksLoaded) {
     return (
       <Button 
-        variant={variant} 
+        variant="secondary" 
         size={size}
         disabled
         className={className}
       >
-        <Wallet className="w-4 h-4 mr-2" />
-        Loading...
+        <AlertCircle className="w-4 h-4 mr-2 text-muted-foreground" />
+        <span className="text-muted-foreground">Wallet Unavailable</span>
       </Button>
     )
   }

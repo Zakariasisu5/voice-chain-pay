@@ -23,7 +23,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           
           // Initialize Web3Modal with enhanced configuration
           try {
-            if (!__HAS_WEB3MODAL__) throw new Error('no web3modal')
+            if (!__HAS_WEB3MODAL__) throw new Error('Web3Modal not available')
             // @ts-ignore
             const web3modal = await import('@web3modal/wagmi')
             const createWeb3Modal = (web3modal as any).createWeb3Modal || (web3modal as any).default?.createWeb3Modal

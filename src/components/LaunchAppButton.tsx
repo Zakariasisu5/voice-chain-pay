@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Rocket, Wallet } from "lucide-react"
+import { Rocket, Wallet, AlertCircle } from "lucide-react"
 import { useWallet } from "@/hooks/useWallet"
 import { useToast } from "@/hooks/use-toast"
 import { ReactNode } from "react"
@@ -25,10 +25,13 @@ export function LaunchAppButton({
   const handleLaunch = async () => {
     if (!hooksLoaded) {
       toast({
-        title: "Loading...",
-        description: "Wallet system is still loading. Please wait a moment.",
+        title: "Wallet System Unavailable",
+        description: "Wallet connectivity is not available. Some features may be limited.",
         variant: "default"
       })
+      if (onLaunch) {
+        onLaunch() // Allow launching even without wallet
+      }
       return
     }
 
@@ -60,8 +63,8 @@ export function LaunchAppButton({
     if (!hooksLoaded) {
       return (
         <>
-          <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Loading...
+          <AlertCircle className="w-4 h-4 mr-2" />
+          Launch App
         </>
       )
     }
