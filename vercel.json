@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "functions": {
-    "api/**/*.js": { "runtime": "vercel/node@2.1.0" },
-    "api/**/*.ts": { "runtime": "vercel/node@2.1.0" }
-  }
-}
