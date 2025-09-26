@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+  "prebuild": "node ./scripts/check-build-env.cjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
