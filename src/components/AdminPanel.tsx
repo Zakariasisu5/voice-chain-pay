@@ -20,12 +20,15 @@ import {
   Filter,
   Download,
   Eye,
+  Copy,
+  ExternalLink,
   TrendingUp,
   Users,
   DollarSign,
   Activity
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { openExplorerTx } from '@/lib/utils';
 import { parseApprovalCommand } from '@/lib/voice';
 import { approvePayment, logVoiceApproval } from '@/lib/zenopay';
 import { useRevealOnScroll } from "@/components/ui/use-in-view";
@@ -53,6 +56,7 @@ interface AuditLog {
   timestamp: string;
   voiceTranscript?: string;
   txHash?: string;
+  chain?: string;
 }
 
 interface TreasuryBalance {
@@ -481,7 +485,16 @@ export default function AdminPanel() {
                         {log.txHash && (
                           <>
                             <span className="text-muted-foreground">•</span>
-                            <span className="text-primary cursor-pointer hover:underline">{log.txHash}</span>
+                            <button className="text-primary hover:underline text-sm flex items-center space-x-2" onClick={() => {
+                              const opened = openExplorerTx(log.chain ?? 'Ethereum', log.txHash);
+                              if (!opened) toast({ title: 'Explorer unavailable', description: 'No explorer configured for this chain' });
+                            }}>
+                              <span>{log.txHash}</span>
+                              <ExternalLink className="w-4 h-4" />
+                            </button>
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard?.writeText(log.txHash || ''); toast({ title: 'Copied', description: 'Tx hash copied' }); }}>
+                              <Copy className="w-4 h-4" />
+                            </Button>
                           </>
                         )}
                       </div>

@@ -1,28 +1,47 @@
-import { defaultWagmiConfig } from '@web3modal/wagmi/react/config'
-import { cookieStorage, createStorage } from 'wagmi'
-import { mainnet, arbitrum, optimism, polygon, base, bsc, avalanche } from 'wagmi/chains'
+// This module avoids static imports of optional wallet libraries so Vite
+// doesn't fail import-analysis when those packages are not installed.
+// It exposes `projectId` and an async `loadWalletConfig()` that will
+// try to dynamically import and construct the real wagmi config when
+// available. Otherwise it returns null.
 
-// Get projectId from https://cloud.reown.com
 export const projectId = 'demo-project-id-12345'
 
-// For production, replace with your actual project ID from https://cloud.reown.com
-// if (!projectId) throw new Error('Project ID is not defined')
+export async function loadWalletConfig() {
+  try {
+    if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
+      throw new Error('Optional packages not installed')
+    }
+    // Dynamically import optional packages using new Function to avoid Vite import-analysis
+    // @ts-ignore
+    const { defaultWagmiConfig } = await (new Function('return import("@web3modal/wagmi/react/config")'))()
+    // @ts-ignore
+    const { cookieStorage, createStorage } = await (new Function('return import("wagmi")'))()
+    // @ts-ignore
+    const chainsMod = await (new Function('return import("wagmi/chains")'))()
+    const { mainnet, arbitrum, optimism, polygon, base, bsc, avalanche } = chainsMod
 
-const metadata = {
-  name: 'Omnichain Payroll',
-  description: 'Cross-chain payroll made simple',
-  url: 'https://omnichain-payroll.com', // origin must match your domain & subdomain
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
+    const metadata = {
+      name: 'Omnichain Payroll',
+      description: 'Cross-chain payroll made simple',
+      url: 'https://omnichain-payroll.com',
+      icons: ['https://avatars.githubusercontent.com/u/37784886']
+    }
+
+    const chains = [mainnet, arbitrum, optimism, polygon, base, bsc, avalanche] as const
+
+    const cfg = defaultWagmiConfig({
+      chains,
+      projectId,
+      metadata,
+      ssr: true,
+      storage: createStorage({ storage: cookieStorage })
+    })
+
+    return cfg
+  } catch (err) {
+    // Optional dependencies not installed — caller should handle a null result.
+    // eslint-disable-next-line no-console
+    console.warn('Optional wagmi/web3modal configuration not available:', err)
+    return null
+  }
 }
-
-// Create wagmiConfig
-const chains = [mainnet, arbitrum, optimism, polygon, base, bsc, avalanche] as const
-export const config = defaultWagmiConfig({
-  chains,
-  projectId,
-  metadata,
-  ssr: true,
-  storage: createStorage({
-    storage: cookieStorage
-  }),
-})

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useRevealOnScroll } from "@/components/ui/use-in-view";
 import { ethers } from 'ethers';
 import { connectWallet, getBalance, shortenAddress, isMetaMaskAvailable } from '@/lib/wallet';
+import { openExplorerTx } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,7 @@ interface PayoutRequest {
   requestedAt: string;
   wallet: string;
   description: string;
+  txHash?: string;
 }
 
 interface WalletBalance {
@@ -38,6 +40,7 @@ const mockRequests: PayoutRequest[] = [
     token: "ETH",
     chain: "Ethereum",
     status: "completed",
+    txHash: '0x5e1d3b6c9f3a1b2c4d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c',
     requestedAt: "2024-01-15",
     wallet: "0x742d...8c4a",
     description: "Smart contract development - Q1 milestone"
@@ -409,10 +412,18 @@ export default function ContributorDashboard() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
+                        {/* Copy tx hash (if available) */}
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          const hash = (request as any).txHash;
+                          if (hash) { navigator.clipboard?.writeText(hash); toast({ title: 'Copied', description: 'Tx hash copied to clipboard' }); }
+                        }}>
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        {/* Open tx on explorer */}
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          const opened = openExplorerTx(request.chain, (request as any).txHash);
+                          if (!opened) toast({ title: 'Explorer unavailable', description: 'No explorer configured for this chain' });
+                        }}>
                           <ExternalLink className="w-4 h-4" />
                         </Button>
                       </div>
