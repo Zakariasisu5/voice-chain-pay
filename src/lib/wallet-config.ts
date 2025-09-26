@@ -1,41 +1,67 @@
+// Enhanced wallet configuration with multiple wallet support
 // This module avoids static imports of optional wallet libraries so Vite
 // doesn't fail import-analysis when those packages are not installed.
-// It exposes `projectId` and an async `loadWalletConfig()` that will
-// try to dynamically import and construct the real wagmi config when
-// available. Otherwise it returns null.
 
-export const projectId = 'demo-project-id-12345'
+export const projectId = '47da30d2f5ed7d2c5a1b8a3f8c6e4d9f'
 
 export async function loadWalletConfig() {
   try {
     if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
       throw new Error('Optional packages not installed')
     }
-    // Use guarded dynamic imports. The build flags (__HAS_WAGMI__/__HAS_WEB3MODAL__)
-    // allow bundlers to tree-shake these branches when packages are absent.
+    
+    // Use guarded dynamic imports
     // @ts-ignore
     const { defaultWagmiConfig } = await import('@web3modal/wagmi/react/config')
     // @ts-ignore
     const { cookieStorage, createStorage } = await import('wagmi')
     // @ts-ignore
     const chainsMod = await import('wagmi/chains')
-    const { mainnet, arbitrum, optimism, polygon, base, bsc, avalanche } = chainsMod
+    
+    const { 
+      mainnet, 
+      arbitrum, 
+      optimism, 
+      polygon, 
+      base, 
+      bsc, 
+      avalanche,
+      sepolia,
+      polygonMumbai 
+    } = chainsMod
 
     const metadata = {
       name: 'Omnichain Payroll',
-      description: 'Cross-chain payroll made simple',
+      description: 'Cross-chain payroll made simple with multiple wallet support',
       url: 'https://omnichain-payroll.com',
       icons: ['https://avatars.githubusercontent.com/u/37784886']
     }
 
-    const chains = [mainnet, arbitrum, optimism, polygon, base, bsc, avalanche] as const
+    // Enhanced chain support for multiple networks
+    const chains = [
+      mainnet, 
+      arbitrum, 
+      optimism, 
+      polygon, 
+      base, 
+      bsc, 
+      avalanche,
+      sepolia, // Testnet for development
+      polygonMumbai // Testnet for Polygon
+    ] as const
 
     const cfg = defaultWagmiConfig({
       chains,
       projectId,
       metadata,
       ssr: true,
-      storage: createStorage({ storage: cookieStorage })
+      storage: createStorage({ 
+        storage: cookieStorage 
+      }),
+      enableWalletConnect: true,
+      enableInjected: true,
+      enableEIP6963: true, // Enable EIP-6963 for better wallet detection
+      enableCoinbase: true,
     })
 
     return cfg

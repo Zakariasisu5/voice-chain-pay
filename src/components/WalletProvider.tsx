@@ -9,48 +9,71 @@ const queryClient = new QueryClient()
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [WagmiProviderComp, setWagmiProviderComp] = useState<any | null>(null)
   const [wagmiConfig, setWagmiConfig] = useState<any | null>(null)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
     let mounted = true
 
     ;(async () => {
       try {
-        // Try to initialize web3modal (optional). If package missing, this will be caught.
-        // @ts-ignore
-        // If we can load the wagmi config, attempt to initialize the modal
+        // Load wagmi configuration first
         const cfg = await loadWalletConfig()
-        if (cfg) {
-          if (mounted) setWagmiConfig(cfg)
-            try {
+        if (cfg && mounted) {
+          setWagmiConfig(cfg)
+          
+          // Initialize Web3Modal with enhanced configuration
+          try {
             if (!__HAS_WEB3MODAL__) throw new Error('no web3modal')
-            // Guarded dynamic import — bundlers can drop this when package absent
             // @ts-ignore
             const web3modal = await import('@web3modal/wagmi')
             const createWeb3Modal = (web3modal as any).createWeb3Modal || (web3modal as any).default?.createWeb3Modal
+            
             if (mounted && typeof createWeb3Modal === 'function') {
-              createWeb3Modal({ wagmiConfig: cfg, projectId, enableAnalytics: true, enableOnramp: true })
+              createWeb3Modal({ 
+                wagmiConfig: cfg, 
+                projectId,
+                enableAnalytics: true,
+                enableOnramp: true,
+                themeMode: 'dark',
+                themeVariables: {
+                  '--w3m-color-mix': 'hsl(217, 91%, 11%)',
+                  '--w3m-color-mix-strength': 40,
+                  '--w3m-accent': 'hsl(39, 100%, 57%)',
+                  '--w3m-border-radius-master': '8px'
+                },
+                featuredWalletIds: [
+                  'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+                  '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+                  'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+                  '225affb176778569276e484e1b92637ad061b01e13a048b35a9d280c3b58970f', // Safe
+                  '38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662'  // Bitget
+                ]
+              })
             }
           } catch (e) {
-            // optional, ignore
+            console.warn('Web3Modal initialization failed:', e)
           }
         }
       } catch (err) {
-        // optional package not installed - ignore
-        // eslint-disable-next-line no-console
-        console.warn('Optional @web3modal/wagmi not available:', err)
+        console.warn('Wallet configuration loading failed:', err)
       }
 
       try {
-        // Dynamically import wagmi provider if present
-  // Guarded dynamic import
-  if (!__HAS_WAGMI__) throw new Error('no wagmi')
-  // @ts-ignore
-  const wagmiMod = await import('wagmi')
+        // Load Wagmi Provider component
+        if (!__HAS_WAGMI__) throw new Error('no wagmi')
+        // @ts-ignore
+        const wagmiMod = await import('wagmi')
         const Candidate = (wagmiMod as any).WagmiProvider || (wagmiMod as any).WagmiConfig || null
-        if (mounted && Candidate) setWagmiProviderComp(() => Candidate)
+        if (mounted && Candidate) {
+          setWagmiProviderComp(() => Candidate)
+          setIsInitialized(true)
+        }
       } catch (err) {
-        // wagmi not present - we'll render without it
-        if (mounted) setWagmiProviderComp(null)
+        console.warn('Wagmi provider loading failed:', err)
+        if (mounted) {
+          setWagmiProviderComp(null)
+          setIsInitialized(true)
+        }
       }
     })()
 

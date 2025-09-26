@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Rocket } from "lucide-react"
+import { Rocket, Wallet } from "lucide-react"
 import { useWallet } from "@/hooks/useWallet"
 import { useToast } from "@/hooks/use-toast"
 import { ReactNode } from "react"
@@ -19,17 +19,30 @@ export function LaunchAppButton({
   onLaunch,
   children 
 }: LaunchAppButtonProps) {
-  const { isConnected, connectWallet } = useWallet()
+  const { isConnected, isConnecting, connectWallet, hooksLoaded, chainName } = useWallet()
   const { toast } = useToast()
 
-  const handleLaunch = () => {
+  const handleLaunch = async () => {
+    if (!hooksLoaded) {
+      toast({
+        title: "Loading...",
+        description: "Wallet system is still loading. Please wait a moment.",
+        variant: "default"
+      })
+      return
+    }
+
     if (!isConnected) {
       toast({
         title: "Wallet Required",
-        description: "Please connect your wallet to launch the app",
+        description: "Please connect your wallet to launch the app and access cross-chain features",
         variant: "destructive"
       })
-      connectWallet()
+      try {
+        await connectWallet()
+      } catch (error) {
+        console.error('Failed to connect wallet:', error)
+      }
       return
     }
 
@@ -38,9 +51,45 @@ export function LaunchAppButton({
     } else {
       toast({
         title: "Welcome to Omnichain Payroll! 🚀",
-        description: "You're now connected and ready to manage cross-chain payments",
+        description: `Connected to ${chainName}. You're ready to manage cross-chain payments!`,
       })
     }
+  }
+
+  const getButtonContent = () => {
+    if (!hooksLoaded) {
+      return (
+        <>
+          <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          Loading...
+        </>
+      )
+    }
+
+    if (isConnecting) {
+      return (
+        <>
+          <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          Connecting...
+        </>
+      )
+    }
+
+    if (!isConnected) {
+      return (
+        <>
+          <Wallet className="w-4 h-4 mr-2" />
+          Connect & Launch
+        </>
+      )
+    }
+
+    return children || (
+      <>
+        <Rocket className="w-4 h-4 mr-2" />
+        Launch App
+      </>
+    )
   }
 
   return (
@@ -48,14 +97,10 @@ export function LaunchAppButton({
       variant={variant} 
       size={size}
       onClick={handleLaunch}
-      className={className}
+      disabled={isConnecting || !hooksLoaded}
+      className={`${className} transition-all duration-200 hover:scale-105`}
     >
-      {children || (
-        <>
-          <Rocket className="w-4 h-4 mr-2" />
-          Launch App
-        </>
-      )}
+      {getButtonContent()}
     </Button>
   )
 }
