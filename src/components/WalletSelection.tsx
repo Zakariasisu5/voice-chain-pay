@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useWallet } from "@/hooks/useWallet"
 import { useToast } from "@/hooks/use-toast"
-import { Wallet, Smartphone, Shield, Globe, Zap, Check } from "lucide-react"
+import { Wallet, Smartphone, Shield, Globe, Zap, Check, Link } from "lucide-react"
+import { supportedWallets } from "@/lib/wallet-config"
 
 interface WalletSelectionProps {
   isOpen: boolean
@@ -16,34 +17,56 @@ const wallets = [
   {
     id: 'metamask',
     name: 'MetaMask',
-    description: 'Connect using browser extension',
+    description: 'Most popular browser extension wallet',
     icon: Wallet,
-    features: ['Most Popular', 'Browser Extension', 'Mobile App'],
-    recommended: true
+    features: ['Browser Extension', 'Mobile App', 'Hardware Support'],
+    recommended: true,
+    color: 'hsl(39, 100%, 57%)'
   },
   {
     id: 'trust',
     name: 'Trust Wallet',
     description: 'Secure mobile-first wallet',
     icon: Smartphone,
-    features: ['Mobile Optimized', 'Built-in DApp Browser', 'Multi-Chain'],
-    recommended: false
+    features: ['Mobile App', 'DApp Browser', 'Staking'],
+    recommended: false,
+    color: 'hsl(214, 100%, 59%)'
   },
   {
     id: 'coinbase',
     name: 'Coinbase Wallet',
     description: 'Self-custody wallet by Coinbase',
     icon: Globe,
-    features: ['User Friendly', 'Recovery Phrase', 'DeFi Ready'],
-    recommended: false
+    features: ['User Friendly', 'Recovery Phrase', 'DeFi Integration'],
+    recommended: false,
+    color: 'hsl(214, 100%, 50%)'
+  },
+  {
+    id: 'walletconnect',
+    name: 'WalletConnect',
+    description: 'Connect any wallet via QR code',
+    icon: Link,
+    features: ['Universal', 'QR Code', 'Mobile Support'],
+    recommended: false,
+    color: 'hsl(214, 73%, 53%)'
   },
   {
     id: 'safe',
     name: 'Safe Wallet',
     description: 'Multi-signature security',
     icon: Shield,
-    features: ['Multi-Sig', 'Enterprise Grade', 'Team Management'],
-    recommended: false
+    features: ['Multi-Sig', 'Enterprise', 'Team Management'],
+    recommended: false,
+    color: 'hsl(142, 71%, 45%)'
+  },
+  {
+    id: 'phantom',
+    name: 'Phantom',
+    description: 'Popular wallet with multi-chain support',
+    icon: Zap,
+    features: ['Multi-Chain', 'NFT Support', 'Swap Features'],
+    recommended: false,
+    color: 'hsl(271, 91%, 65%)'
   }
 ]
 

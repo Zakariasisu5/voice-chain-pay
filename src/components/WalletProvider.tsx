@@ -35,21 +35,29 @@ export function WalletProvider({ children }: { children: ReactNode }) {
               createWeb3Modal({ 
                 wagmiConfig: cfg, 
                 projectId,
-                enableAnalytics: true,
-                enableOnramp: true,
+                enableAnalytics: false, // Disable to avoid postMessage issues
+                enableOnramp: false, // Disable to simplify setup
                 themeMode: 'dark',
                 themeVariables: {
-                  '--w3m-color-mix': 'hsl(217, 91%, 11%)',
+                  '--w3m-color-mix': 'hsl(222, 84%, 5%)',
                   '--w3m-color-mix-strength': 40,
                   '--w3m-accent': 'hsl(39, 100%, 57%)',
-                  '--w3m-border-radius-master': '8px'
+                  '--w3m-border-radius-master': '12px',
+                  '--w3m-font-family': 'Inter, system-ui, sans-serif'
                 },
                 featuredWalletIds: [
                   'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
                   '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
                   'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
                   '225affb176778569276e484e1b92637ad061b01e13a048b35a9d280c3b58970f', // Safe
-                  '38f5d18bd8522c244bdd70cb4a68e0e718865155811c043f052fb9f1c51de662'  // Bitget
+                  'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393'  // Phantom
+                ],
+                includeWalletIds: [
+                  'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+                  '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+                  'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+                  '225affb176778569276e484e1b92637ad061b01e13a048b35a9d280c3b58970f', // Safe
+                  'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393'  // Phantom
                 ]
               })
               console.log('Web3Modal initialized successfully')

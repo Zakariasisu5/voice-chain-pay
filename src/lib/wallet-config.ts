@@ -4,6 +4,64 @@
 
 export const projectId = '47da30d2f5ed7d2c5a1b8a3f8c6e4d9f'
 
+// Supported wallet configurations
+export const supportedWallets = [
+  {
+    id: 'metamask',
+    name: 'MetaMask',
+    description: 'Most popular browser extension wallet',
+    icon: '🦊',
+    features: ['Browser Extension', 'Mobile App', 'Hardware Wallet Support'],
+    recommended: true,
+    walletConnectId: 'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96'
+  },
+  {
+    id: 'trust',
+    name: 'Trust Wallet',
+    description: 'Secure mobile-first wallet',
+    icon: '🛡️',
+    features: ['Mobile App', 'DApp Browser', 'Staking'],
+    recommended: false,
+    walletConnectId: '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0'
+  },
+  {
+    id: 'coinbase',
+    name: 'Coinbase Wallet',
+    description: 'Self-custody wallet by Coinbase',
+    icon: '🔵',
+    features: ['User Friendly', 'Recovery Phrase', 'DeFi Integration'],
+    recommended: false,
+    walletConnectId: 'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa'
+  },
+  {
+    id: 'walletconnect',
+    name: 'WalletConnect',
+    description: 'Connect any wallet via QR code',
+    icon: '🔗',
+    features: ['Universal', 'QR Code', 'Mobile Support'],
+    recommended: false,
+    walletConnectId: null
+  },
+  {
+    id: 'safe',
+    name: 'Safe Wallet',
+    description: 'Multi-signature security',
+    icon: '🔐',
+    features: ['Multi-Sig', 'Enterprise', 'Team Management'],
+    recommended: false,
+    walletConnectId: '225affb176778569276e484e1b92637ad061b01e13a048b35a9d280c3b58970f'
+  },
+  {
+    id: 'phantom',
+    name: 'Phantom',
+    description: 'Popular Solana wallet with EVM support',
+    icon: '👻',
+    features: ['Multi-Chain', 'NFT Support', 'Swap Features'],
+    recommended: false,
+    walletConnectId: 'a797aa35c0fadbfc1a53e7f675162ed5226968b44a19ee3d24385c64d1d3c393'
+  }
+]
+
 export async function loadWalletConfig() {
   try {
     if (!__HAS_WAGMI__ || !__HAS_WEB3MODAL__) {
@@ -29,10 +87,10 @@ export async function loadWalletConfig() {
     } = chainsMod
 
     const metadata = {
-      name: 'Omnichain Payroll',
+      name: 'ZenoPay - Omnichain Payroll',
       description: 'Cross-chain payroll made simple with multiple wallet support',
-      url: 'https://omnichain-payroll.com',
-      icons: ['https://avatars.githubusercontent.com/u/37784886']
+      url: window.location.origin,
+      icons: [`${window.location.origin}/favicon.ico`]
     }
 
     // Enhanced chain support for multiple networks
@@ -52,7 +110,7 @@ export async function loadWalletConfig() {
       chains,
       projectId,
       metadata,
-      ssr: true,
+      ssr: false, // Set to false for client-side only
       storage: createStorage({ 
         storage: cookieStorage 
       }),
