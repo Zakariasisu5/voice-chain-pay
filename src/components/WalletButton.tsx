@@ -1,10 +1,8 @@
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Wallet, LogOut, ChevronDown, AlertCircle } from "lucide-react"
-import { useWallet } from "@/hooks/useWallet"
+import { Wallet, LogOut, ChevronDown, AlertTriangle } from "lucide-react"
+import { useEthersWallet } from "@/hooks/useEthersWallet"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { WalletSelection } from "@/components/WalletSelection"
 
 interface WalletButtonProps {
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
@@ -13,7 +11,6 @@ interface WalletButtonProps {
 }
 
 export function WalletButton({ variant = "outline", size = "sm", className }: WalletButtonProps) {
-  const [showWalletSelection, setShowWalletSelection] = useState(false)
   const { 
     isConnected, 
     isConnecting, 
@@ -21,73 +18,66 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
     disconnectWallet, 
     formatAddress,
     chainName,
-    connector,
-    hooksLoaded
-  } = useWallet()
+    isWalletAvailable
+  } = useEthersWallet()
   const { toast } = useToast()
 
   const handleConnect = async () => {
-    if (!hooksLoaded) {
-      setShowWalletSelection(true)
+    if (!isWalletAvailable) {
+      toast({
+        title: "No Wallet Detected",
+        description: "Please install MetaMask or another Web3 wallet to continue.",
+        variant: "destructive"
+      })
       return
     }
     
     try {
       await connectWallet()
-    } catch (error) {
+      toast({
+        title: "Wallet Connected",
+        description: "Your wallet has been connected successfully.",
+      })
+    } catch (error: any) {
       toast({
         title: "Connection Failed",
-        description: "Failed to open wallet selection. Please try again.",
+        description: error.message || "Failed to connect wallet. Please try again.",
         variant: "destructive"
       })
     }
   }
 
-  const handleDisconnect = async () => {
-    try {
-      await disconnectWallet()
-      toast({
-        title: "Wallet Disconnected", 
-        description: "Your wallet has been disconnected successfully.",
-      })
-    } catch (error) {
-      toast({
-        title: "Disconnection Failed", 
-        description: "Failed to disconnect wallet. Please try again.",
-        variant: "destructive"
-      })
-    }
+  const handleDisconnect = () => {
+    disconnectWallet()
+    toast({
+      title: "Wallet Disconnected", 
+      description: "Your wallet has been disconnected successfully.",
+    })
   }
 
-  // Show loading state while wallet system initializes
-  if (!hooksLoaded) {
+  // Show wallet not available state
+  if (!isWalletAvailable) {
     return (
-      <>
-        <Button 
-          variant={variant} 
-          size={size}
-          onClick={() => setShowWalletSelection(true)}
-          className={className}
-        >
-          <Wallet className="w-4 h-4 mr-2" />
-          Connect Wallet
-        </Button>
-        <WalletSelection 
-          isOpen={showWalletSelection} 
-          onClose={() => setShowWalletSelection(false)} 
-        />
-      </>
+      <Button 
+        variant="outline" 
+        size={size}
+        onClick={handleConnect}
+        className={`${className} border-orange-500/30 text-orange-600 hover:bg-orange-500/10`}
+      >
+        <AlertTriangle className="w-4 h-4 mr-2" />
+        No Wallet
+      </Button>
     )
   }
 
   if (isConnected) {
     return (
       <div className="flex items-center gap-2">
-        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 px-3 py-1">
+        <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20 px-3 py-1">
           <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
           <div className="flex flex-col items-start">
             <span className="text-xs font-medium">{formatAddress}</span>
-            <span className="text-xs opacity-70">{chainName} • {connector}</span>
+            <span className="text-xs opacity-70">{chainName}</span>
           </div>
         </Badge>
         <Button 

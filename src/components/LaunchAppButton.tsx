@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
-import { Rocket, Wallet, AlertCircle } from "lucide-react"
-import { useWallet } from "@/hooks/useWallet"
+import { Rocket, Wallet, AlertTriangle } from "lucide-react"
+import { useEthersWallet } from "@/hooks/useEthersWallet"
 import { useToast } from "@/hooks/use-toast"
 import { ReactNode } from "react"
 
@@ -19,15 +19,15 @@ export function LaunchAppButton({
   onLaunch,
   children 
 }: LaunchAppButtonProps) {
-  const { isConnected, isConnecting, connectWallet, hooksLoaded, chainName } = useWallet()
+  const { isConnected, isConnecting, connectWallet, isWalletAvailable, chainName } = useEthersWallet()
   const { toast } = useToast()
 
   const handleLaunch = async () => {
-    if (!hooksLoaded) {
+    if (!isWalletAvailable) {
       toast({
-        title: "Wallet System Unavailable",
-        description: "Wallet connectivity is not available. Some features may be limited.",
-        variant: "default"
+        title: "No Wallet Detected",
+        description: "Please install MetaMask or another Web3 wallet to access full features.",
+        variant: "destructive"
       })
       if (onLaunch) {
         onLaunch() // Allow launching even without wallet
@@ -43,8 +43,16 @@ export function LaunchAppButton({
       })
       try {
         await connectWallet()
-      } catch (error) {
-        console.error('Failed to connect wallet:', error)
+        toast({
+          title: "Wallet Connected",
+          description: "Your wallet has been connected successfully.",
+        })
+      } catch (error: any) {
+        toast({
+          title: "Connection Failed",
+          description: error.message || "Failed to connect wallet. Please try again.",
+          variant: "destructive"
+        })
       }
       return
     }
@@ -53,18 +61,18 @@ export function LaunchAppButton({
       onLaunch()
     } else {
       toast({
-        title: "Welcome to Omnichain Payroll! 🚀",
+        title: "Welcome to ZenoPay DAO! 🚀",
         description: `Connected to ${chainName}. You're ready to manage cross-chain payments!`,
       })
     }
   }
 
   const getButtonContent = () => {
-    if (!hooksLoaded) {
+    if (!isWalletAvailable) {
       return (
         <>
-          <AlertCircle className="w-4 h-4 mr-2" />
-          Launch App
+          <AlertTriangle className="w-4 h-4 mr-2" />
+          Install Wallet
         </>
       )
     }
@@ -100,7 +108,7 @@ export function LaunchAppButton({
       variant={variant} 
       size={size}
       onClick={handleLaunch}
-      disabled={isConnecting || !hooksLoaded}
+      disabled={isConnecting}
       className={`${className} transition-all duration-200 hover:scale-105`}
     >
       {getButtonContent()}
