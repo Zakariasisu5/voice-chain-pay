@@ -1,4 +1,4 @@
-# ZenoPay
+# ZenoPay DAO
 
 A modern, AI-powered cross-chain payroll system built for DAOs and remote teams. ZenoPay enables seamless payments across multiple blockchain networks with intelligent voice-controlled admin approvals powered by Zeno AI.
 
