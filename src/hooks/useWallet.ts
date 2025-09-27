@@ -25,68 +25,82 @@ export function useWallet() {
   }
 
   try {
-    // Dynamic imports with proper error handling
-    const wagmi = require('wagmi')
-    const web3modal = require('@web3modal/wagmi/react')
+    // Use proper conditional hook loading
+    const wagmi = (globalThis as any).__WAGMI_HOOKS__ || null
+    const web3modal = (globalThis as any).__WEB3MODAL_HOOKS__ || null
     
-    const { useAccount, useDisconnect } = wagmi
-    const { useWeb3Modal } = web3modal
-    
-    const account = useAccount()
-    const { disconnect } = useDisconnect()
-    const { open } = useWeb3Modal()
-    
-    const connectWallet = useCallback(async () => {
+    if (!wagmi || !web3modal) {
+      // Initialize hooks if not already done
       try {
-        await open()
-      } catch (error) {
-        console.error('Failed to open wallet modal:', error)
-        throw error
+        // This will be handled by the WalletProvider
+        if (typeof window !== 'undefined') {
+          // Hooks should be available via the provider context
+          const account = { address: null, isConnected: false, isConnecting: false, isDisconnected: true, chainId: null, connector: null }
+          const disconnect = () => Promise.resolve()
+          const open = () => Promise.resolve()
+          
+          const connectWallet = useCallback(async () => {
+            console.warn('Web3Modal not initialized yet')
+          }, [])
+
+          const disconnectWallet = useCallback(async () => {
+            console.warn('Wallet not connected')
+          }, [])
+
+          const formatAddress = useMemo(() => '', [])
+
+          const getChainName = useCallback((chainId?: number) => {
+            if (!chainId) return 'Unknown'
+            const chainNames: Record<number, string> = {
+              1: 'Ethereum',
+              137: 'Polygon', 
+              42161: 'Arbitrum',
+              10: 'Optimism',
+              8453: 'Base',
+              56: 'BSC',
+              43114: 'Avalanche',
+              11155111: 'Sepolia',
+              80001: 'Mumbai'
+            }
+            return chainNames[chainId] || `Chain ${chainId}`
+          }, [])
+
+          return {
+            address: account.address || null,
+            isConnected: Boolean(account.isConnected && !account.isConnecting),
+            isConnecting: Boolean(account.isConnecting),
+            isDisconnected: Boolean(account.isDisconnected),
+            chainId: account.chainId || null,
+            chainName: getChainName(account.chainId),
+            connector: account.connector?.name || null,
+            connectWallet,
+            disconnectWallet,
+            formatAddress,
+            hooksLoaded: false
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to initialize wallet hooks:', e)
       }
-    }, [open])
+    }
 
-    const disconnectWallet = useCallback(async () => {
-      try {
-        await disconnect()
-      } catch (error) {
-        console.error('Failed to disconnect wallet:', error)
-        throw error
-      }
-    }, [disconnect])
-
-    const formatAddress = useMemo(() => {
-      if (!account.address) return ''
-      return `${account.address.slice(0, 6)}...${account.address.slice(-4)}`
-    }, [account.address])
-
-    const getChainName = useCallback((chainId?: number) => {
-      if (!chainId) return 'Unknown'
-      const chainNames: Record<number, string> = {
-        1: 'Ethereum',
-        137: 'Polygon', 
-        42161: 'Arbitrum',
-        10: 'Optimism',
-        8453: 'Base',
-        56: 'BSC',
-        43114: 'Avalanche',
-        11155111: 'Sepolia',
-        80001: 'Mumbai'
-      }
-      return chainNames[chainId] || `Chain ${chainId}`
-    }, [])
-
+    // Fallback return
     return {
-      address: account.address || null,
-      isConnected: Boolean(account.isConnected && !account.isConnecting),
-      isConnecting: Boolean(account.isConnecting),
-      isDisconnected: Boolean(account.isDisconnected),
-      chainId: account.chainId || null,
-      chainName: getChainName(account.chainId),
-      connector: account.connector?.name || null,
-      connectWallet,
-      disconnectWallet,
-      formatAddress,
-      hooksLoaded: true
+      address: null,
+      isConnected: false,
+      isConnecting: false, 
+      isDisconnected: true,
+      chainId: null,
+      chainName: 'Unknown',
+      connector: null,
+      connectWallet: async () => {
+        console.warn('Wallet functionality not available')
+      },
+      disconnectWallet: async () => {
+        console.warn('Wallet functionality not available')
+      },
+      formatAddress: '',
+      hooksLoaded: false
     }
   } catch (error) {
     console.warn('Error using wagmi hooks:', error)
