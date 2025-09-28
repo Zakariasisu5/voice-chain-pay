@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRevealOnScroll } from "@/components/ui/use-in-view";
 import { ethers } from 'ethers';
-import { connectWallet, getBalance, shortenAddress, isMetaMaskAvailable } from '@/lib/wallet';
+import { useEthersWallet } from "@/hooks/useEthersWallet";
 import { openExplorerTx } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,35 +102,35 @@ export default function ContributorDashboard() {
     wallet: '',
     description: ''
   });
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-  const [walletBalance, setWalletBalance] = useState<string | undefined>(undefined);
-  const [walletChainId, setWalletChainId] = useState<number | undefined>(undefined);
-  const [connector, setConnector] = useState<'injected' | 'walletconnect'>('injected');
+  const { 
+    isConnected: isWalletConnected, 
+    address: walletAddress, 
+    balance: walletBalance, 
+    chainId: walletChainId,
+    isConnecting,
+    connectWallet: handleConnectWallet,
+    disconnectWallet,
+    formatAddress,
+    chainName,
+    isWalletAvailable
+  } = useEthersWallet();
   const { toast } = useToast();
   useRevealOnScroll();
-  const handleConnectWallet = async () => {
-    if (connector === 'injected' && !isMetaMaskAvailable()) {
-      toast({ title: 'No Injected Wallet Found', description: 'Install MetaMask or choose WalletConnect.', variant: 'destructive' });
+  const handleConnect = async () => {
+    if (!isWalletAvailable) {
+      toast({ title: 'No Wallet Found', description: 'Install MetaMask or another Web3 wallet.', variant: 'destructive' });
       return;
     }
     try {
-      const w = await connectWallet(connector);
-      setWalletAddress(w.address);
-      setWalletBalance(w.balance);
-      setWalletChainId(w.chainId);
-      setIsWalletConnected(true);
-      toast({ title: 'Wallet Connected', description: `${shortenAddress(w.address)} • ${w.balance} ETH` });
+      await handleConnectWallet();
+      toast({ title: 'Wallet Connected', description: `${formatAddress} • ${walletBalance} ETH` });
     } catch (err: any) {
       toast({ title: 'Connection Error', description: err?.message || String(err), variant: 'destructive' });
     }
   };
 
   const handleDisconnect = () => {
-    setIsWalletConnected(false);
-    setWalletAddress('');
-    setWalletBalance(undefined);
-    setWalletChainId(undefined);
+    disconnectWallet();
     toast({ title: 'Wallet Disconnected' });
   };
 
@@ -192,39 +192,7 @@ export default function ContributorDashboard() {
     return () => off();
   }, []);
 
-  // Wallet event listeners (accounts/chain changes)
-  useEffect(() => {
-    const provider: any = (typeof window !== 'undefined') ? (window as any).ethereum : null;
-    if (!provider) return;
-
-    const handleAccounts = async (accounts: string[]) => {
-      if (!accounts || accounts.length === 0) {
-        handleDisconnect();
-        return;
-      }
-      const address = accounts[0];
-      setWalletAddress(address);
-      try { setWalletBalance(await getBalance(address)); } catch (e) { /* ignore */ }
-      setIsWalletConnected(true);
-    };
-
-    const handleChain = async (chainHex: string) => {
-      try {
-        const chainId = parseInt(chainHex, 16);
-        setWalletChainId(chainId);
-      } catch (e) {
-        setWalletChainId(undefined);
-      }
-    };
-
-    provider.on && provider.on('accountsChanged', handleAccounts);
-    provider.on && provider.on('chainChanged', handleChain);
-
-    return () => {
-      provider.removeListener && provider.removeListener('accountsChanged', handleAccounts);
-      provider.removeListener && provider.removeListener('chainChanged', handleChain);
-    };
-  }, []);
+  // Wallet event listeners are now handled in useEthersWallet hook
 
   const totalUsdValue = mockBalances.reduce((sum, balance) => sum + parseFloat(balance.usdValue.replace(/,/g, '')), 0);
 
@@ -239,27 +207,19 @@ export default function ContributorDashboard() {
             <p className="text-muted-foreground">Manage your payouts and track earnings across chains</p>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 bg-muted/40 p-2 rounded-md">
-              <button
-                className={`text-sm px-3 py-1 rounded ${connector === 'injected' ? 'bg-primary text-white' : ''} ${!isMetaMaskAvailable() ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => isMetaMaskAvailable() && setConnector('injected')}
-                disabled={!isMetaMaskAvailable()}
-              >Injected</button>
-              <button className={`text-sm px-3 py-1 rounded ${connector === 'walletconnect' ? 'bg-primary text-white' : ''}`} onClick={() => setConnector('walletconnect')}>WalletConnect</button>
-            </div>
             {!isWalletConnected ? (
-              <Button className="zeno-cta" onClick={handleConnectWallet}>
+              <Button className="zeno-cta" onClick={handleConnect} disabled={isConnecting}>
                 <Wallet className="w-4 h-4 mr-2" />
-                Connect Wallet
+                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
               </Button>
             ) : (
               <div className="flex items-center space-x-3">
                 <div className="px-3 py-2 bg-muted rounded-md text-sm flex items-center space-x-2">
-                  <span className="font-medium">{shortenAddress(walletAddress)}</span>
+                  <span className="font-medium">{formatAddress}</span>
                   <span className="text-xs text-muted-foreground">{walletBalance ? `${parseFloat(walletBalance).toFixed(4)} ETH` : ''}</span>
-                  <Badge variant="outline">{walletChainId ?? '—'}</Badge>
+                  <Badge variant="outline">{chainName}</Badge>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard?.writeText(walletAddress); toast({ title: 'Copied', description: 'Address copied to clipboard' }); }}>
+                <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard?.writeText(walletAddress || ''); toast({ title: 'Copied', description: 'Address copied to clipboard' }); }}>
                   <Copy className="w-4 h-4" />
                 </Button>
                 <Button size="sm" variant="destructive" onClick={handleDisconnect}>Disconnect</Button>
