@@ -7,6 +7,10 @@ import { Coins, Shield, Zap, Users, ChevronRight, Star, Play } from "lucide-reac
 import heroImage from "@/assets/hero-image.jpg";
 import { useToast } from "@/hooks/use-toast";
 
+interface LandingPageProps {
+  onViewChange?: (view: string) => void;
+}
+
 const FloatingBubble = ({ delay = 0, size = "w-8 h-8" }: { delay?: number; size?: string }) => (
   <div 
     className={`${size} rounded-full gradient-primary opacity-20 absolute animate-float shadow-glow`}
@@ -68,7 +72,7 @@ const features = [
   }
 ];
 
-export default function LandingPage() {
+export default function LandingPage({ onViewChange }: LandingPageProps) {
   const [selectedDemo, setSelectedDemo] = useState("contributor");
   const { toast } = useToast();
   useRevealOnScroll();
@@ -76,12 +80,11 @@ export default function LandingPage() {
   const handleLaunchApp = () => {
     toast({
       title: "Welcome to ZenoPay!",
-      description: "Redirecting to the dashboard...",
+      description: "Launching the contributor dashboard...",
     });
-    // In a real app, this would redirect to the main dashboard
-    setTimeout(() => {
-      window.location.href = "#contributor";
-    }, 1000);
+    if (onViewChange) {
+      onViewChange('contributor');
+    }
   };
 
   const handleLearnMore = () => {
@@ -98,10 +101,9 @@ export default function LandingPage() {
       title: "Free Trial Started!",
       description: "Welcome to ZenoPay. You can now access all features.",
     });
-    // In a real app, this would start a trial period
-    setTimeout(() => {
-      window.location.href = "#contributor";
-    }, 1000);
+    if (onViewChange) {
+      onViewChange('contributor');
+    }
   };
 
   return (

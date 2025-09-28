@@ -16,7 +16,7 @@ const Index = () => {
         return <AdminPanel />;
       case 'landing':
       default:
-        return <LandingPage />;
+        return <LandingPage onViewChange={setCurrentView} />;
     }
   };
 
