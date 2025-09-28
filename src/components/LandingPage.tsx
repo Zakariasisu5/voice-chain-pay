@@ -3,7 +3,10 @@ import useInView, { useRevealOnScroll } from "@/components/ui/use-in-view";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Coins, Shield, Zap, Users, ChevronRight, Star, Play } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Coins, Shield, Zap, Users, ChevronRight, Star, Play, Mail, Building, User } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import { useToast } from "@/hooks/use-toast";
 
@@ -74,6 +77,14 @@ const features = [
 
 export default function LandingPage({ onViewChange }: LandingPageProps) {
   const [selectedDemo, setSelectedDemo] = useState("contributor");
+  const [showTrialModal, setShowTrialModal] = useState(false);
+  const [trialForm, setTrialForm] = useState({
+    name: '',
+    email: '',
+    organization: '',
+    role: ''
+  });
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const { toast } = useToast();
   useRevealOnScroll();
 
@@ -97,10 +108,40 @@ export default function LandingPage({ onViewChange }: LandingPageProps) {
   };
 
   const handleStartTrial = () => {
+    setShowTrialModal(true);
+  };
+
+  const handleTrialSubmit = async () => {
+    if (!trialForm.name || !trialForm.email || !trialForm.organization) {
+      toast({
+        title: "Please fill required fields",
+        description: "Name, email, and organization are required to start your trial.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsStartingTrial(true);
+    
+    // Simulate API call to set up trial
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     toast({
-      title: "Free Trial Started!",
-      description: "Welcome to ZenoPay. You can now access all features.",
+      title: "🎉 Free Trial Started!",
+      description: `Welcome ${trialForm.name}! Your 14-day trial is now active.`,
     });
+
+    // Store trial info in localStorage (in a real app, this would be sent to backend)
+    localStorage.setItem('zenoPayTrial', JSON.stringify({
+      ...trialForm,
+      startDate: new Date().toISOString(),
+      expiryDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+    }));
+
+    setShowTrialModal(false);
+    setIsStartingTrial(false);
+    
+    // Navigate to contributor dashboard
     if (onViewChange) {
       onViewChange('contributor');
     }
@@ -262,6 +303,98 @@ export default function LandingPage({ onViewChange }: LandingPageProps) {
           </div>
         </div>
       </section>
+
+      {/* Trial Signup Modal */}
+      <Dialog open={showTrialModal} onOpenChange={setShowTrialModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Start Your Free Trial</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="text-center text-sm text-muted-foreground mb-6">
+              Get 14 days of full access to ZenoPay's cross-chain payment features
+            </div>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="trial-name">Full Name *</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="trial-name"
+                    placeholder="Enter your full name"
+                    value={trialForm.name}
+                    onChange={(e) => setTrialForm({...trialForm, name: e.target.value})}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="trial-email">Email Address *</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="trial-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={trialForm.email}
+                    onChange={(e) => setTrialForm({...trialForm, email: e.target.value})}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="trial-org">Organization *</Label>
+                <div className="relative">
+                  <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="trial-org"
+                    placeholder="Your DAO or company name"
+                    value={trialForm.organization}
+                    onChange={(e) => setTrialForm({...trialForm, organization: e.target.value})}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="trial-role">Role (Optional)</Label>
+                <Input
+                  id="trial-role"
+                  placeholder="e.g., Treasurer, Operations Lead"
+                  value={trialForm.role}
+                  onChange={(e) => setTrialForm({...trialForm, role: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 pt-4">
+              <Button 
+                onClick={handleTrialSubmit}
+                disabled={isStartingTrial}
+                className="w-full"
+              >
+                {isStartingTrial ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Setting up your trial...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Start 14-Day Free Trial
+                  </>
+                )}
+              </Button>
+              <Button variant="ghost" onClick={() => setShowTrialModal(false)} disabled={isStartingTrial}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="relative z-10 px-6 py-12 border-t border-border/50">
