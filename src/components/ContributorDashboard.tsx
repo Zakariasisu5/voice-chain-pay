@@ -68,10 +68,10 @@ const mockRequests: PayoutRequest[] = [
 ];
 
 const mockBalances: WalletBalance[] = [
-  { chain: "Ethereum", token: "ETH", balance: "2.5", usdValue: "5,847.50" },
-  { chain: "Polygon", token: "USDC", balance: "15,000", usdValue: "15,000.00" },
-  { chain: "Bitcoin", token: "BTC", balance: "0.25", usdValue: "10,875.00" },
-  { chain: "Arbitrum", token: "ARB", balance: "500", usdValue: "875.00" }
+  { chain: "Ethereum", token: "ETH", balance: "0.00", usdValue: "0.00" },
+  { chain: "Polygon", token: "USDC", balance: "0.00", usdValue: "0.00" },
+  { chain: "Bitcoin", token: "BTC", balance: "0.00", usdValue: "0.00" },
+  { chain: "Arbitrum", token: "ARB", balance: "0.00", usdValue: "0.00" }
 ];
 
 const getStatusColor = (status: string) => {

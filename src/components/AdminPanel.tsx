@@ -131,10 +131,10 @@ const mockAuditLogs: AuditLog[] = [
 ];
 
 const mockTreasuryBalances: TreasuryBalance[] = [
-  { chain: "Ethereum", token: "ETH", balance: "125.5", usdValue: "293,185.50", lockedAmount: "5.2" },
-  { chain: "Bitcoin", token: "BTC", balance: "15.8", usdValue: "687,300.00", lockedAmount: "1.1" },
-  { chain: "Polygon", token: "USDC", balance: "500,000", usdValue: "500,000.00", lockedAmount: "12,000" },
-  { chain: "Arbitrum", token: "ARB", balance: "25,000", usdValue: "43,750.00", lockedAmount: "2,000" }
+  { chain: "Ethereum", token: "ETH", balance: "0.00", usdValue: "0.00", lockedAmount: "0.00" },
+  { chain: "Bitcoin", token: "BTC", balance: "0.00", usdValue: "0.00", lockedAmount: "0.00" },
+  { chain: "Polygon", token: "USDC", balance: "0.00", usdValue: "0.00", lockedAmount: "0.00" },
+  { chain: "Arbitrum", token: "ARB", balance: "0.00", usdValue: "0.00", lockedAmount: "0.00" }
 ];
 
 const getPriorityColor = (priority: string) => {
