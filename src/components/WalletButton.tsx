@@ -1,8 +1,11 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Wallet, LogOut, ChevronDown, AlertTriangle } from "lucide-react"
+import { Wallet, LogOut, ChevronDown, AlertTriangle, Settings } from "lucide-react"
 import { useEthersWallet } from "@/hooks/useEthersWallet"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { WalletSelection } from "./WalletSelection"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 
 interface WalletButtonProps {
   variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
@@ -11,6 +14,7 @@ interface WalletButtonProps {
 }
 
 export function WalletButton({ variant = "outline", size = "sm", className }: WalletButtonProps) {
+  const [showWalletSelection, setShowWalletSelection] = useState(false)
   const { 
     isConnected, 
     isConnecting, 
@@ -24,11 +28,8 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
 
   const handleConnect = async () => {
     if (!isWalletAvailable) {
-      toast({
-        title: "No Wallet Detected",
-        description: "Please install MetaMask or another Web3 wallet to continue.",
-        variant: "destructive"
-      })
+      // Show wallet selection modal for better UX
+      setShowWalletSelection(true)
       return
     }
     
@@ -45,6 +46,10 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
         variant: "destructive"
       })
     }
+  }
+
+  const handleWalletSelection = () => {
+    setShowWalletSelection(true)
   }
 
   const handleDisconnect = () => {
@@ -72,47 +77,79 @@ export function WalletButton({ variant = "outline", size = "sm", className }: Wa
 
   if (isConnected) {
     return (
-      <div className="flex items-center gap-2">
-        <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20 px-3 py-1">
-          <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-          <div className="flex flex-col items-start">
-            <span className="text-xs font-medium">{formatAddress}</span>
-            <span className="text-xs opacity-70">{chainName}</span>
-          </div>
-        </Badge>
-        <Button 
-          variant="ghost" 
-          size={size}
-          onClick={handleDisconnect}
-          className={`${className} hover:bg-destructive/10 hover:text-destructive`}
-          title="Disconnect Wallet"
-        >
-          <LogOut className="w-4 h-4" />
-        </Button>
-      </div>
+      <>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="bg-green-500/10 text-green-700 border-green-500/20 px-3 py-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+            <div className="flex flex-col items-start">
+              <span className="text-xs font-medium">{formatAddress}</span>
+              <span className="text-xs opacity-70">{chainName}</span>
+            </div>
+          </Badge>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size={size}
+                className={`${className} hover:bg-accent`}
+              >
+                <Settings className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleWalletSelection}>
+                <Wallet className="w-4 h-4 mr-2" />
+                Switch Wallet
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleDisconnect}
+                className="text-destructive focus:text-destructive"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Disconnect
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
+        <WalletSelection 
+          isOpen={showWalletSelection} 
+          onClose={() => setShowWalletSelection(false)} 
+        />
+      </>
     )
   }
 
   return (
-    <Button 
-      variant={variant} 
-      size={size}
-      onClick={handleConnect}
-      disabled={isConnecting}
-      className={`${className} group`}
-    >
-      <Wallet className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-      {isConnecting ? (
-        <>
-          <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          Connecting...
-        </>
-      ) : (
-        <>
-          Connect Wallet
-          <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
-        </>
-      )}
-    </Button>
+    <>
+      <Button 
+        variant={variant} 
+        size={size}
+        onClick={handleWalletSelection}
+        disabled={isConnecting}
+        className={`${className} group`}
+      >
+        <Wallet className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+        {isConnecting ? (
+          <>
+            <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Connecting...
+          </>
+        ) : (
+          <>
+            Connect Wallet
+            <ChevronDown className="w-3 h-3 ml-1 opacity-50" />
+          </>
+        )}
+      </Button>
+      
+      <WalletSelection 
+        isOpen={showWalletSelection} 
+        onClose={() => setShowWalletSelection(false)} 
+      />
+    </>
   )
 }
