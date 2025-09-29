@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Mic, MicOff, Bot, User, Wallet, CreditCard, HelpCircle, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { parseVoiceCommand, getVoiceCommandHelp } from "@/lib/voice";
 
 interface Message {
   id: string;
@@ -85,10 +86,49 @@ export default function ChatBot() {
     toast({ title: '🎤 Voice Recording Started', description: 'Listening for your command...' });
     setTimeout(() => {
       setIsListening(false);
-      const samples = ['Approve 0.5 ETH to Alice on Ethereum', 'Request payout of 1000 USDC to Polygon', 'Show pending requests'];
+      const samples = [
+        'Approve 0.5 ETH to Alice on Ethereum', 
+        'Request payout of 1000 USDC to Polygon', 
+        'Show pending requests',
+        'Check my balance',
+        'Reject payment REQ-001 because insufficient funds',
+        'Help with voice commands'
+      ];
       const picked = samples[Math.floor(Math.random() * samples.length)];
       addMessage(`🎤 Voice Command: "${picked}"`, 'user');
-      setTimeout(() => addMessage('Simulated result: processed voice command.', 'bot'), 900);
+      
+      // Parse the voice command and provide intelligent response
+      setTimeout(() => {
+        const command = parseVoiceCommand(picked);
+        if (command) {
+          let response = '';
+          switch (command.action) {
+            case 'approve':
+              response = `✅ Processing approval for ${command.amount || ''} ${command.token || ''} to ${command.recipient || 'recipient'}. This would normally execute the payment approval.`;
+              break;
+            case 'reject':
+              response = `❌ Processing rejection for ${command.requestId || 'payment'}. Reason: ${command.reason || 'Voice command rejection'}`;
+              break;
+            case 'request':
+              response = `💰 Processing payment request for ${command.amount} ${command.token} to ${command.recipient || 'specified recipient'}`;
+              break;
+            case 'check':
+              response = '📊 Opening balance overview... Your current balances would be displayed here.';
+              break;
+            case 'list':
+              response = '📋 Showing pending payment requests... Your pending requests would be listed here.';
+              break;
+            case 'help':
+              response = `🆘 Voice Commands Help:\n\n${getVoiceCommandHelp()}`;
+              break;
+            default:
+              response = `Processed voice command: ${command.action}`;
+          }
+          addMessage(response, 'bot');
+        } else {
+          addMessage('Sorry, I could not understand that voice command. Try saying "Help" for available commands.', 'bot');
+        }
+      }, 900);
     }, 2000);
   };
 

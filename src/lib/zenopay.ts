@@ -41,6 +41,100 @@ export async function logVoiceApproval(requestId: number, transcript: string) {
   return tx;
 }
 
+// Multi-sig wallet functions
+export async function getMultiSigInfo() {
+  const provider = getProvider();
+  const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, provider);
+  
+  try {
+    const multisigAddress = await vault.multisig();
+    const threshold = await vault.highValueThreshold();
+    return { multisigAddress, threshold: threshold.toString() };
+  } catch (error) {
+    console.error('Error getting multisig info:', error);
+    return { multisigAddress: '', threshold: '0' };
+  }
+}
+
+export async function checkRequiresMultiSig(amount: string) {
+  const provider = getProvider();
+  const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, provider);
+  
+  try {
+    const threshold = await vault.highValueThreshold();
+    const amountWei = ethers.utils.parseEther(amount);
+    return amountWei.gte(threshold);
+  } catch (error) {
+    console.error('Error checking multisig requirement:', error);
+    return false;
+  }
+}
+
+export async function executeMultiSigPayment(requestId: number) {
+  const provider = getProvider();
+  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  
+  try {
+    // Get multisig address
+    const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, provider);
+    const multisigAddress = await vault.multisig();
+    
+    if (!multisigAddress || multisigAddress === ethers.constants.AddressZero) {
+      throw new Error('No multisig wallet configured');
+    }
+
+    // For demo purposes, we'll execute directly from the current signer
+    // In production, this would require proper multisig signature aggregation
+    const vaultWithSigner = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, signer);
+    const tx = await vaultWithSigner.executeFromMultisig(requestId);
+    return tx;
+  } catch (error) {
+    console.error('Error executing multisig payment:', error);
+    throw error;
+  }
+}
+
+export async function getMultiSigOwners() {
+  const provider = getProvider();
+  
+  try {
+    const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, provider);
+    const multisigAddress = await vault.multisig();
+    
+    if (!multisigAddress || multisigAddress === ethers.constants.AddressZero) {
+      return [];
+    }
+
+    // Get multisig contract (simplified for demo)
+    const multisigAbi = [
+      'function owners(uint256) view returns (address)',
+      'function threshold() view returns (uint256)',
+      'function isOwner(address) view returns (bool)'
+    ];
+    
+    const multisig = getContract(multisigAddress, multisigAbi, provider);
+    const threshold = await multisig.threshold();
+    
+    // Get first few owners (in production, you'd query all)
+    const owners = [];
+    for (let i = 0; i < 5; i++) {
+      try {
+        const owner = await multisig.owners(i);
+        if (owner !== ethers.constants.AddressZero) {
+          owners.push(owner);
+        }
+      } catch {
+        break;
+      }
+    }
+    
+    return { owners, threshold: threshold.toString() };
+  } catch (error) {
+    console.error('Error getting multisig owners:', error);
+    return { owners: [], threshold: '0' };
+  }
+}
+
 export function listenToEvents(onPaymentRequested: (data: any) => void, onPayoutSent: (data: any) => void, onVoiceApproved: (data: any) => void) {
   const provider = getProvider();
   const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, provider);

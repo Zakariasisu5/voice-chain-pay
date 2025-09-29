@@ -1,7 +1,7 @@
 import { useState } from "react";
 import LandingPage from "@/components/LandingPage";
 import ContributorDashboard from "@/components/ContributorDashboard";
-import AdminPanel from "@/components/AdminPanel";
+import EnhancedAdminPanel from "@/components/EnhancedAdminPanel";
 import ChatBot from "@/components/ChatBot";
 import Navigation from "@/components/Navigation";
 
@@ -13,7 +13,7 @@ const Index = () => {
       case 'contributor':
         return <ContributorDashboard />;
       case 'admin':
-        return <AdminPanel />;
+        return <EnhancedAdminPanel />;
       case 'landing':
       default:
         return <LandingPage onViewChange={setCurrentView} />;

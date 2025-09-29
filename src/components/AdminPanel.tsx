@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { openExplorerTx } from '@/lib/utils';
-import { parseApprovalCommand } from '@/lib/voice';
+import { parseApprovalCommand, parseVoiceCommand } from '@/lib/voice';
 import { approvePayment, logVoiceApproval } from '@/lib/zenopay';
 import { useRevealOnScroll } from "@/components/ui/use-in-view";
 
@@ -199,22 +199,63 @@ export default function AdminPanel() {
         title: "Voice Recording Started",
         description: "Listening for approval commands...",
       });
-      // Simulate voice recognition after 3 seconds
+      
+      // Enhanced voice recognition simulation with more command types
       setTimeout(() => {
         setVoiceRecording(false);
-        const transcript = "Approve 0.1 BTC to Alice Johnson";
+        const sampleCommands = [
+          "Approve 0.1 BTC to Alice Johnson",
+          "Reject payment REQ-004 because insufficient documentation",
+          "Request 500 USDC to Bob Smith",
+          "Check pending requests",
+          "Show balance overview"
+        ];
+        
+        const transcript = sampleCommands[Math.floor(Math.random() * sampleCommands.length)];
         toast({ title: "Voice Command Detected", description: `Processing: '${transcript}'` });
-        const parsed = parseApprovalCommand(transcript);
+        
+        const parsed = parseVoiceCommand(transcript);
         if (parsed) {
-          // Map recipient name to request id in demo
-          const recipientKey = parsed.recipient.toLowerCase();
-          let requestId = 'REQ-003';
-          if (recipientKey.includes('bob')) requestId = 'REQ-004';
-          if (recipientKey.includes('carol')) requestId = 'REQ-005';
-          // Auto-approve with transcript
-          setTimeout(() => {
-            handleApprove(requestId, transcript);
-          }, 1000);
+          switch (parsed.action) {
+            case 'approve':
+              // Map recipient name to request id in demo
+              const recipientKey = parsed.recipient?.toLowerCase() || '';
+              let requestId = 'REQ-003';
+              if (recipientKey.includes('bob')) requestId = 'REQ-004';
+              if (recipientKey.includes('carol')) requestId = 'REQ-005';
+              // Auto-approve with transcript
+              setTimeout(() => {
+                handleApprove(requestId, transcript);
+              }, 1000);
+              break;
+              
+            case 'reject':
+              const rejectId = parsed.requestId || 'REQ-004';
+              setTimeout(() => {
+                handleReject(rejectId, parsed.reason);
+              }, 1000);
+              break;
+              
+            case 'check':
+              toast({ 
+                title: 'Balance Check', 
+                description: 'Opening treasury overview...' 
+              });
+              break;
+              
+            case 'list':
+              toast({ 
+                title: 'Pending Requests', 
+                description: 'Showing pending payment requests...' 
+              });
+              break;
+              
+            default:
+              toast({ 
+                title: `Command: ${parsed.action}`, 
+                description: `Processed "${transcript}"` 
+              });
+          }
         } else {
           toast({ title: 'Could not parse voice command', variant: 'destructive' });
         }
