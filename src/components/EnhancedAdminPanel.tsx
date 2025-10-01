@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Settings, Mic } from "lucide-react";
 import { useRevealOnScroll } from "@/components/ui/use-in-view";
+import { useEthersWallet } from "@/hooks/useEthersWallet";
+import NetworkSwitcher from "./NetworkSwitcher";
 import AdminPanel from "./AdminPanel";
 import VoiceAssistant from "./VoiceAssistant";
 import MultiSigPanel from "./MultiSigPanel";
@@ -12,6 +14,7 @@ import { VoiceCommand } from "@/lib/voice";
 export default function EnhancedAdminPanel() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showVoiceAssistant, setShowVoiceAssistant] = useState(false);
+  const { isConnected } = useEthersWallet();
   useRevealOnScroll();
 
   const handleVoiceCommand = (command: VoiceCommand) => {
@@ -52,6 +55,7 @@ export default function EnhancedAdminPanel() {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              {isConnected && <NetworkSwitcher />}
               <Button
                 variant={showVoiceAssistant ? "default" : "outline"}
                 onClick={() => setShowVoiceAssistant(!showVoiceAssistant)}

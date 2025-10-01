@@ -6,12 +6,57 @@ export function formatAddress(addr: string) {
 }
 
 // Zenopay SDK helpers (ethers v5)
-export const ZENOPAY_CONTRACTS = {
-  // Fill with deployed addresses after running smart-contracts deploy script
-  payrollVault: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
-  crossChainPayout: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-  auditTrail: '0x5FbDB2315678afecb367f032d93F642f64180aa3'
-};
+// Network configurations
+export const SUPPORTED_NETWORKS = {
+  localhost: {
+    chainId: 31337,
+    name: 'Localhost',
+    rpcUrl: 'http://127.0.0.1:8545',
+    explorer: undefined as string | undefined,
+    contracts: {
+      payrollVault: '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9',
+      crossChainPayout: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+      auditTrail: '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+    }
+  },
+  zetaTestnet: {
+    chainId: 7001,
+    name: 'ZetaChain Athens Testnet',
+    rpcUrl: 'https://zetachain-athens.blockpi.network/rpc/v1/public',
+    explorer: 'https://athens.explorer.zetachain.com',
+    contracts: {
+      // Update these after deploying to ZetaChain testnet
+      payrollVault: '0x0000000000000000000000000000000000000000',
+      crossChainPayout: '0x0000000000000000000000000000000000000000',
+      auditTrail: '0x0000000000000000000000000000000000000000'
+    }
+  },
+  mainnet: {
+    chainId: 1,
+    name: 'Ethereum Mainnet',
+    rpcUrl: 'https://eth-mainnet.alchemyapi.io/v2/_gg7wSSi0KMBsdKnGVfHDueq6xMB9EkC',
+    explorer: 'https://etherscan.io',
+    contracts: {
+      // Update these after deploying to mainnet
+      payrollVault: '0x0000000000000000000000000000000000000000',
+      crossChainPayout: '0x0000000000000000000000000000000000000000',
+      auditTrail: '0x0000000000000000000000000000000000000000'
+    }
+  }
+} as const;
+
+// Default to localhost for development
+export const CURRENT_NETWORK = 'localhost';
+
+export const ZENOPAY_CONTRACTS = SUPPORTED_NETWORKS[CURRENT_NETWORK].contracts;
+
+export function getNetworkConfig(chainId: number) {
+  return Object.values(SUPPORTED_NETWORKS).find(n => n.chainId === chainId);
+}
+
+export function isNetworkSupported(chainId: number): boolean {
+  return Object.values(SUPPORTED_NETWORKS).some(n => n.chainId === chainId);
+}
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Wallet, Clock, Check, X, AlertCircle, Send, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { requestPayment, listenToEvents } from '@/lib/zenopay';
+import { requestPayment, listenToEvents, ensureWalletConnected } from '@/lib/zenopay';
+import NetworkSwitcher from './NetworkSwitcher';
 
 interface PayoutRequest {
   id: string;
@@ -169,12 +170,32 @@ export default function ContributorDashboard() {
     // Call on-chain requestPayment (amount should be converted to wei for ETH-like tokens)
     (async () => {
       try {
+        // Ensure wallet is connected first
+        await ensureWalletConnected();
+        
         const amountWei = ethers.utils.parseUnits(payoutForm.amount || '0', 18).toString();
-        const tx = await requestPayment(amountWei, 1, payoutForm.wallet); // targetChainId=1 as placeholder
-        toast({ title: 'Payout Request Submitted', description: `Tx sent: ${tx.hash}` });
+        const chainIdMap: Record<string, number> = {
+          'Ethereum': 1,
+          'Polygon': 137,
+          'Arbitrum': 42161,
+          'Optimism': 10,
+          'BNB Chain': 56
+        };
+        const targetChainId = chainIdMap[payoutForm.chain] || 1;
+        
+        toast({ title: 'Submitting Request...', description: 'Please confirm the transaction in your wallet' });
+        const tx = await requestPayment(amountWei, targetChainId, payoutForm.wallet);
+        toast({ 
+          title: 'Payout Request Submitted', 
+          description: `Transaction confirmed: ${tx.hash.slice(0, 10)}...`
+        });
         setPayoutForm({ amount: '', token: '', chain: '', wallet: '', description: '' });
       } catch (err: any) {
-        toast({ title: 'Error', description: err?.message || String(err), variant: 'destructive' });
+        toast({ 
+          title: 'Error', 
+          description: err?.message || String(err), 
+          variant: 'destructive' 
+        });
       }
     })();
   };
@@ -214,6 +235,7 @@ export default function ContributorDashboard() {
               </Button>
             ) : (
               <div className="flex items-center space-x-3">
+                <NetworkSwitcher />
                 <div className="px-3 py-2 bg-muted rounded-md text-sm flex items-center space-x-2">
                   <span className="font-medium">{formatAddress}</span>
                   <span className="text-xs text-muted-foreground">{walletBalance ? `${parseFloat(walletBalance).toFixed(4)} ETH` : ''}</span>

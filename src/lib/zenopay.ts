@@ -1,43 +1,105 @@
 import { ethers } from 'ethers';
-import { ZENOPAY_CONTRACTS } from './utils';
+import { ZENOPAY_CONTRACTS, SUPPORTED_NETWORKS, CURRENT_NETWORK, isNetworkSupported } from './utils';
 import { payrollVaultAbi, crossChainPayoutAbi, auditTrailAbi, getContract } from './contracts';
 
 export function getProvider() {
   if ((window as any).ethereum) {
     return new ethers.providers.Web3Provider((window as any).ethereum);
   }
-  return ethers.getDefaultProvider();
+  // Fallback to configured RPC
+  return new ethers.providers.JsonRpcProvider(SUPPORTED_NETWORKS[CURRENT_NETWORK].rpcUrl);
+}
+
+export async function ensureWalletConnected() {
+  const provider = getProvider();
+  if (provider instanceof ethers.providers.Web3Provider) {
+    try {
+      const network = await provider.getNetwork();
+      const expectedChainId = SUPPORTED_NETWORKS[CURRENT_NETWORK].chainId;
+      
+      if (network.chainId !== expectedChainId) {
+        throw new Error(
+          `Please switch to ${SUPPORTED_NETWORKS[CURRENT_NETWORK].name} (Chain ID: ${expectedChainId}). Currently on Chain ID: ${network.chainId}`
+        );
+      }
+      
+      const signer = provider.getSigner();
+      await signer.getAddress(); // This will throw if not connected
+      return { provider, signer };
+    } catch (error: any) {
+      if (error.code === 'UNSUPPORTED_OPERATION') {
+        throw new Error('Please connect your wallet first');
+      }
+      throw error;
+    }
+  }
+  throw new Error('No Web3 provider found. Please install MetaMask or another Web3 wallet.');
+}
+
+export async function switchToSupportedNetwork() {
+  if (!(window as any).ethereum) {
+    throw new Error('No Web3 provider found');
+  }
+  
+  const targetNetwork = SUPPORTED_NETWORKS[CURRENT_NETWORK];
+  const chainIdHex = `0x${targetNetwork.chainId.toString(16)}`;
+  
+  try {
+    await (window as any).ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: chainIdHex }],
+    });
+  } catch (switchError: any) {
+    // This error code indicates that the chain has not been added to MetaMask
+    if (switchError.code === 4902) {
+      try {
+        await (window as any).ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: chainIdHex,
+            chainName: targetNetwork.name,
+            rpcUrls: [targetNetwork.rpcUrl],
+            blockExplorerUrls: targetNetwork.explorer ? [targetNetwork.explorer] : undefined,
+          }],
+        });
+      } catch (addError) {
+        throw new Error('Failed to add network to wallet');
+      }
+    } else {
+      throw switchError;
+    }
+  }
 }
 
 export async function requestPayment(amountWei: string, targetChainId: number, targetWallet: string) {
-  const provider = getProvider();
-  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  const { signer } = await ensureWalletConnected();
   const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, signer);
   const tx = await vault.requestPayment(amountWei, targetChainId, targetWallet);
+  await tx.wait(); // Wait for confirmation
   return tx;
 }
 
 export async function approvePayment(requestId: number) {
-  const provider = getProvider();
-  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  const { signer } = await ensureWalletConnected();
   const vault = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, signer);
   const tx = await vault.forwardRequestToPayout(requestId, { value: 0 });
+  await tx.wait();
   return tx;
 }
 
 export async function executePayout(payload: string, destChainId: number, value = '0') {
-  const provider = getProvider();
-  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  const { signer } = await ensureWalletConnected();
   const cross = getContract(ZENOPAY_CONTRACTS.crossChainPayout, crossChainPayoutAbi, signer);
   const tx = await cross.sendPayout(ethers.utils.arrayify(payload), destChainId, { value });
+  await tx.wait();
   return tx;
 }
 
 export async function logVoiceApproval(requestId: number, transcript: string) {
-  const provider = getProvider();
-  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  const { signer } = await ensureWalletConnected();
   const audit = getContract(ZENOPAY_CONTRACTS.auditTrail, auditTrailAbi, signer);
   const tx = await audit.logVoiceApproval(requestId, await signer.getAddress(), transcript);
+  await tx.wait();
   return tx;
 }
 
@@ -71,8 +133,7 @@ export async function checkRequiresMultiSig(amount: string) {
 }
 
 export async function executeMultiSigPayment(requestId: number) {
-  const provider = getProvider();
-  const signer = (provider as ethers.providers.Web3Provider).getSigner();
+  const { signer, provider } = await ensureWalletConnected();
   
   try {
     // Get multisig address
@@ -87,6 +148,7 @@ export async function executeMultiSigPayment(requestId: number) {
     // In production, this would require proper multisig signature aggregation
     const vaultWithSigner = getContract(ZENOPAY_CONTRACTS.payrollVault, payrollVaultAbi, signer);
     const tx = await vaultWithSigner.executeFromMultisig(requestId);
+    await tx.wait();
     return tx;
   } catch (error) {
     console.error('Error executing multisig payment:', error);
