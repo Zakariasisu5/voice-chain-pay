@@ -192,8 +192,8 @@ export default function MultiSigPanel() {
       {/* Multi-sig Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Shield className="w-5 h-5 text-blue-500" />
+          <CardTitle className="flex items-center space-x-2 text-lg md:text-xl">
+            <Shield className="w-5 h-5 text-blue-500 flex-shrink-0" />
             <span>Multi-Signature Wallet</span>
           </CardTitle>
         </CardHeader>
@@ -204,13 +204,14 @@ export default function MultiSigPanel() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">Wallet Address</label>
                   <div className="flex items-center space-x-2">
-                    <code className="text-xs bg-muted px-2 py-1 rounded">
-                      {multisigInfo.multisigAddress.slice(0, 20)}...
+                    <code className="text-xs bg-muted px-2 py-1 rounded truncate flex-1">
+                      {multisigInfo.multisigAddress.slice(0, 10)}...{multisigInfo.multisigAddress.slice(-8)}
                     </code>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => copyAddress(multisigInfo.multisigAddress)}
+                      className="flex-shrink-0"
                     >
                       <Copy className="w-3 h-3" />
                     </Button>
@@ -219,7 +220,7 @@ export default function MultiSigPanel() {
                 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-muted-foreground">High Value Threshold</label>
-                  <div className="text-lg font-bold">
+                  <div className="text-base md:text-lg font-bold">
                     {parseFloat(multisigInfo.threshold) / 1e18} ETH
                   </div>
                 </div>
@@ -232,17 +233,18 @@ export default function MultiSigPanel() {
                 <div className="space-y-1">
                   {owners.owners.map((owner, index) => (
                     <div key={index} className="flex items-center space-x-2 p-2 bg-muted/50 rounded">
-                      <Users className="w-4 h-4 text-blue-500" />
-                      <code className="text-xs flex-1">
-                        {owner.slice(0, 20)}...{owner.slice(-8)}
+                      <Users className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <code className="text-xs flex-1 truncate">
+                        {owner.slice(0, 10)}...{owner.slice(-8)}
                       </code>
                       {owner === address && (
-                        <Badge variant="outline" className="text-xs">You</Badge>
+                        <Badge variant="outline" className="text-xs flex-shrink-0">You</Badge>
                       )}
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => copyAddress(owner)}
+                        className="flex-shrink-0 h-8 w-8 p-0"
                       >
                         <Copy className="w-3 h-3" />
                       </Button>
@@ -274,8 +276,8 @@ export default function MultiSigPanel() {
       {multisigInfo.multisigAddress && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-orange-500" />
+            <CardTitle className="flex items-center space-x-2 text-lg md:text-xl">
+              <Clock className="w-5 h-5 text-orange-500 flex-shrink-0" />
               <span>Pending Multi-Sig Transactions</span>
             </CardTitle>
           </CardHeader>
@@ -288,25 +290,27 @@ export default function MultiSigPanel() {
             ) : (
               <div className="space-y-4">
                 {mockPendingTransactions.map((tx) => (
-                  <div key={tx.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <div className="font-medium">{tx.description}</div>
+                  <div key={tx.id} className="border rounded-lg p-3 md:p-4 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <div className="font-medium text-sm md:text-base">{tx.description}</div>
                         {tx.amount && (
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-xs md:text-sm text-muted-foreground truncate">
                             {tx.amount} {tx.token} → {tx.recipient}
                           </div>
                         )}
                         <div className="text-xs text-muted-foreground">
-                          Transaction ID: {tx.id} • Created: {new Date(tx.createdAt).toLocaleDateString()}
+                          ID: {tx.id} • {new Date(tx.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      {getStatusBadge(tx)}
+                      <div className="flex-shrink-0">
+                        {getStatusBadge(tx)}
+                      </div>
                     </div>
 
                     {/* Signature Progress */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center justify-between text-xs md:text-sm">
                         <span>Signatures: {tx.currentSignatures}/{tx.requiredSignatures}</span>
                         <span>{Math.round((tx.currentSignatures / tx.requiredSignatures) * 100)}%</span>
                       </div>
@@ -318,12 +322,12 @@ export default function MultiSigPanel() {
 
                     {/* Signers */}
                     <div className="space-y-1">
-                      <div className="text-sm font-medium">Signed by:</div>
+                      <div className="text-xs md:text-sm font-medium">Signed by:</div>
                       <div className="space-y-1">
                         {tx.signers.map((signer, index) => (
                           <div key={index} className="flex items-center space-x-2 text-xs">
-                            <CheckCircle className="w-3 h-3 text-green-500" />
-                            <code>{signer.slice(0, 20)}...</code>
+                            <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />
+                            <code className="truncate">{signer.slice(0, 15)}...{signer.slice(-8)}</code>
                           </div>
                         ))}
                       </div>
@@ -331,13 +335,14 @@ export default function MultiSigPanel() {
 
                     {/* Actions */}
                     {isOwner && (
-                      <div className="flex items-center space-x-2 pt-2">
+                      <div className="flex flex-wrap items-center gap-2 pt-2">
                         {tx.currentSignatures < tx.requiredSignatures && (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleSign(tx.id)}
                             disabled={processingTx === tx.id}
+                            className="text-xs md:text-sm"
                           >
                             Sign Transaction
                           </Button>
@@ -347,7 +352,7 @@ export default function MultiSigPanel() {
                             size="sm"
                             onClick={() => handleExecute(tx.id)}
                             disabled={processingTx === tx.id}
-                            className="bg-green-500 hover:bg-green-600 text-white"
+                            className="bg-green-500 hover:bg-green-600 text-white text-xs md:text-sm"
                           >
                             Execute Transaction
                           </Button>

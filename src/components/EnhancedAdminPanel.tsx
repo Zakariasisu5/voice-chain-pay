@@ -43,36 +43,40 @@ export default function EnhancedAdminPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-background p-3 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         {/* Enhanced Header */}
         <div className="zeno-card p-4 rounded-lg reveal">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-3xl font-bold">ZenoPay Admin Console</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-2xl md:text-3xl font-bold">ZenoPay Admin Console</h1>
+              <p className="text-sm md:text-base text-muted-foreground">
                 Advanced treasury management with voice commands and multi-signature security
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center gap-2">
               {isConnected && <NetworkSwitcher />}
               <Button
+                size="sm"
                 variant={showVoiceAssistant ? "default" : "outline"}
                 onClick={() => setShowVoiceAssistant(!showVoiceAssistant)}
+                className="flex-shrink-0"
               >
-                <Mic className="w-4 h-4 mr-2" />
-                Voice Assistant
+                <Mic className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Voice Assistant</span>
               </Button>
               <Button 
+                size="sm"
                 variant="outline"
                 onClick={() => setActiveTab("multisig")}
+                className="flex-shrink-0"
               >
-                <Shield className="w-4 h-4 mr-2" />
-                Multi-Sig Wallet
+                <Shield className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Multi-Sig</span>
               </Button>
-              <Button variant="outline">
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
+              <Button size="sm" variant="outline" className="flex-shrink-0">
+                <Settings className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Settings</span>
               </Button>
             </div>
           </div>
@@ -82,10 +86,19 @@ export default function EnhancedAdminPanel() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="dashboard">Payment Dashboard</TabsTrigger>
-                <TabsTrigger value="multisig">Multi-Sig Management</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics & Audit</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 h-auto">
+                <TabsTrigger value="dashboard" className="text-xs md:text-sm px-2 md:px-4">
+                  <span className="hidden sm:inline">Payment Dashboard</span>
+                  <span className="sm:hidden">Payments</span>
+                </TabsTrigger>
+                <TabsTrigger value="multisig" className="text-xs md:text-sm px-2 md:px-4">
+                  <span className="hidden sm:inline">Multi-Sig Management</span>
+                  <span className="sm:hidden">Multi-Sig</span>
+                </TabsTrigger>
+                <TabsTrigger value="analytics" className="text-xs md:text-sm px-2 md:px-4">
+                  <span className="hidden sm:inline">Analytics & Audit</span>
+                  <span className="sm:hidden">Analytics</span>
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="dashboard" className="space-y-6">
@@ -114,17 +127,17 @@ export default function EnhancedAdminPanel() {
           </div>
 
           {/* Voice Assistant Sidebar */}
-          <div className="lg:col-span-1">
-            {showVoiceAssistant && (
-              <div className="sticky top-6">
+          {showVoiceAssistant && (
+            <div className="lg:col-span-1 fixed lg:static bottom-0 left-0 right-0 lg:top-6 z-50 lg:z-0">
+              <div className="lg:sticky lg:top-6 bg-background lg:bg-transparent border-t lg:border-none p-4 lg:p-0 max-h-[50vh] lg:max-h-none overflow-y-auto">
                 <VoiceAssistant
                   onCommand={handleVoiceCommand}
                   onApproval={handleApproval}
                   onRejection={handleRejection}
                 />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

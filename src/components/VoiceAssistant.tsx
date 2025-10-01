@@ -263,15 +263,16 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
   const isVoiceSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="pb-3">
+    <Card className="w-full max-w-md shadow-lg">
+      <CardHeader className="pb-3 px-4 md:px-6">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Voice Assistant</CardTitle>
+          <CardTitle className="text-base md:text-lg">Voice Assistant</CardTitle>
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowHelp(!showHelp)}
+              className="h-8 w-8 p-0"
             >
               <HelpCircle className="w-4 h-4" />
             </Button>
@@ -284,7 +285,7 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-4 md:px-6">
         {/* Voice Control */}
         <div className="text-center space-y-3">
           <Button
@@ -292,29 +293,29 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
             size="lg"
             onClick={isListening ? stopListening : startListening}
             disabled={isProcessing}
-            className={`w-full ${isListening ? 'animate-pulse' : ''}`}
+            className={`w-full text-sm md:text-base ${isListening ? 'animate-pulse' : ''}`}
           >
             {isListening ? (
               <>
-                <MicOff className="w-5 h-5 mr-2" />
+                <MicOff className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                 Stop Listening
               </>
             ) : (
               <>
-                <Mic className="w-5 h-5 mr-2" />
+                <Mic className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                 Start Voice Command
               </>
             )}
           </Button>
 
           {isListening && (
-            <div className="text-sm text-muted-foreground animate-pulse">
+            <div className="text-xs md:text-sm text-muted-foreground animate-pulse">
               🎤 Listening... Speak clearly
             </div>
           )}
 
           {isProcessing && (
-            <div className="text-sm text-muted-foreground animate-pulse">
+            <div className="text-xs md:text-sm text-muted-foreground animate-pulse">
               ⚙️ Processing command...
             </div>
           )}
@@ -323,8 +324,8 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
         {/* Transcript Display */}
         {transcript && (
           <div className="p-3 bg-muted rounded-lg space-y-2">
-            <div className="text-sm font-medium">Last Command:</div>
-            <div className="text-sm">{transcript}</div>
+            <div className="text-xs md:text-sm font-medium">Last Command:</div>
+            <div className="text-xs md:text-sm break-words">{transcript}</div>
             {confidence > 0 && (
               <div className="text-xs text-muted-foreground">
                 Confidence: {Math.round(confidence * 100)}%
@@ -336,27 +337,27 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
         {/* Last Command Result */}
         {lastCommand && (
           <div className="p-3 bg-primary/5 rounded-lg space-y-2">
-            <div className="text-sm font-medium">Recognized Command:</div>
-            <Badge variant="outline" className="capitalize">
+            <div className="text-xs md:text-sm font-medium">Recognized Command:</div>
+            <Badge variant="outline" className="capitalize text-xs">
               {lastCommand.action}
             </Badge>
             {lastCommand.amount && (
-              <div className="text-sm">
+              <div className="text-xs md:text-sm break-words">
                 Amount: {lastCommand.amount} {lastCommand.token}
               </div>
             )}
             {lastCommand.recipient && (
-              <div className="text-sm">To: {lastCommand.recipient}</div>
+              <div className="text-xs md:text-sm break-words">To: {lastCommand.recipient}</div>
             )}
             {lastCommand.chain && (
-              <div className="text-sm">Chain: {lastCommand.chain}</div>
+              <div className="text-xs md:text-sm">Chain: {lastCommand.chain}</div>
             )}
           </div>
         )}
 
         {/* Help Section */}
         {showHelp && (
-          <div className="p-3 bg-blue-50 rounded-lg text-sm">
+          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded-lg text-xs md:text-sm overflow-x-auto">
             <pre className="whitespace-pre-wrap text-xs">
               {getVoiceCommandHelp()}
             </pre>
@@ -371,7 +372,7 @@ export default function VoiceAssistant({ onCommand, onApproval, onRejection }: V
             ) : (
               <VolumeX className="w-3 h-3 text-orange-500" />
             )}
-            <span>
+            <span className="text-xs">
               {isVoiceSupported ? 'Voice Recognition Active' : 'Simulation Mode'}
             </span>
           </div>

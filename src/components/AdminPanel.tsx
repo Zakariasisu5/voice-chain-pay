@@ -273,78 +273,79 @@ export default function AdminPanel() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-background p-3 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
         
         {/* Header */}
         <div className="zeno-card p-4 rounded-lg reveal">
-          <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Admin Panel</h1>
-            <p className="text-muted-foreground">Manage treasury, approve payouts, and monitor activity</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant={voiceRecording ? "destructive" : "outline"}
-              onClick={toggleVoiceRecording}
-              className={voiceRecording ? "animate-pulse" : ""}
-            >
-              {voiceRecording ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
-              {voiceRecording ? "Stop Recording" : "Voice Commands"}
-            </Button>
-            <Button className="zeno-cta">
-              <Shield className="w-4 h-4 mr-2" />
-              Multi-Sig Wallet
-            </Button>
-          </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
+              <p className="text-sm md:text-base text-muted-foreground">Manage treasury, approve payouts, and monitor activity</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant={voiceRecording ? "destructive" : "outline"}
+                onClick={toggleVoiceRecording}
+                className={voiceRecording ? "animate-pulse" : ""}
+              >
+                {voiceRecording ? <MicOff className="w-4 h-4 md:mr-2" /> : <Mic className="w-4 h-4 md:mr-2" />}
+                <span className="hidden sm:inline">{voiceRecording ? "Stop Recording" : "Voice Commands"}</span>
+              </Button>
+              <Button size="sm" className="zeno-cta">
+                <Shield className="w-4 h-4 md:mr-2" />
+                <span className="hidden sm:inline">Multi-Sig Wallet</span>
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           <Card className="shadow-card reveal">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center space-x-2">
-                <DollarSign className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Treasury</p>
-                  <p className="text-2xl font-bold">${totalTreasuryValue.toLocaleString()}</p>
+                <DollarSign className="w-6 h-6 md:w-8 md:h-8 text-primary flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">Total Treasury</p>
+                  <p className="text-lg md:text-2xl font-bold truncate">${totalTreasuryValue.toLocaleString()}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card className="shadow-card reveal">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center space-x-2">
-                <Clock className="w-8 h-8 text-yellow-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending Requests</p>
-                  <p className="text-2xl font-bold">{mockPendingRequests.length}</p>
+                <Clock className="w-6 h-6 md:w-8 md:h-8 text-yellow-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">Pending</p>
+                  <p className="text-lg md:text-2xl font-bold">{mockPendingRequests.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="shadow-card reveal">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center space-x-2">
-                <Users className="w-8 h-8 text-blue-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Contributors</p>
-                  <p className="text-2xl font-bold">24</p>
+                <Users className="w-6 h-6 md:w-8 md:h-8 text-blue-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">Contributors</p>
+                  <p className="text-lg md:text-2xl font-bold">24</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="shadow-card reveal">
-            <CardContent className="p-6">
+            <CardContent className="p-4 md:p-6">
               <div className="flex items-center space-x-2">
-                <TrendingUp className="w-8 h-8 text-green-500" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Monthly Volume</p>
-                  <p className="text-2xl font-bold">$127K</p>
+                <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-green-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs md:text-sm font-medium text-muted-foreground truncate">Monthly</p>
+                  <p className="text-lg md:text-2xl font-bold truncate">$127K</p>
                 </div>
               </div>
             </CardContent>
@@ -352,30 +353,39 @@ export default function AdminPanel() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pending">Pending Requests</TabsTrigger>
-            <TabsTrigger value="treasury">Treasury Overview</TabsTrigger>
-            <TabsTrigger value="audit">Audit Log</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="pending" className="text-xs md:text-sm px-2 md:px-4">
+              <span className="hidden sm:inline">Pending Requests</span>
+              <span className="sm:hidden">Pending</span>
+            </TabsTrigger>
+            <TabsTrigger value="treasury" className="text-xs md:text-sm px-2 md:px-4">
+              <span className="hidden sm:inline">Treasury Overview</span>
+              <span className="sm:hidden">Treasury</span>
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="text-xs md:text-sm px-2 md:px-4">
+              <span className="hidden sm:inline">Audit Log</span>
+              <span className="sm:hidden">Audit</span>
+            </TabsTrigger>
           </TabsList>
 
           {/* Pending Requests Tab */}
           <TabsContent value="pending" className="space-y-6">
             <Card className="shadow-card reveal">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Pending Payout Requests</CardTitle>
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <CardTitle className="text-lg md:text-xl">Pending Payout Requests</CardTitle>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-3 text-muted-foreground" />
                       <Input
-                        placeholder="Search requests..."
-                        className="pl-10 w-64"
+                        placeholder="Search..."
+                        className="pl-10 w-full sm:w-48 md:w-64"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
                     <Select value={filterStatus} onValueChange={setFilterStatus}>
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-full sm:w-32">
                         <Filter className="w-4 h-4 mr-2" />
                         <SelectValue />
                       </SelectTrigger>
@@ -390,63 +400,68 @@ export default function AdminPanel() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Contributor</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Chain</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Requested</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {mockPendingRequests.map((request) => (
-                      <TableRow key={request.id} className="reveal">
-                        <TableCell className="font-medium">{request.contributor}</TableCell>
-                        <TableCell>
-                          <div>
-                            <span className="font-semibold">{request.amount} {request.token}</span>
-                            <div className="text-sm text-muted-foreground">{request.estimatedValue}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{request.chain}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getPriorityColor(request.priority)}>{request.priority}</Badge>
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate">{request.description}</TableCell>
-                        <TableCell>{new Date(request.requestedAt).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2">
-                            <Button 
-                              size="sm" 
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                              onClick={() => handleApprove(request.id)}
-                              disabled={isProcessing}
-                            >
-                              <Check className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => handleReject(request.id)}
-                              disabled={isProcessing}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <div className="overflow-x-auto -mx-6 md:mx-0">
+                  <div className="inline-block min-w-full align-middle">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap">Contributor</TableHead>
+                          <TableHead className="whitespace-nowrap">Amount</TableHead>
+                          <TableHead className="whitespace-nowrap hidden sm:table-cell">Chain</TableHead>
+                          <TableHead className="whitespace-nowrap">Priority</TableHead>
+                          <TableHead className="whitespace-nowrap hidden md:table-cell">Description</TableHead>
+                          <TableHead className="whitespace-nowrap hidden lg:table-cell">Requested</TableHead>
+                          <TableHead className="whitespace-nowrap">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mockPendingRequests.map((request) => (
+                          <TableRow key={request.id} className="reveal">
+                            <TableCell className="font-medium whitespace-nowrap">{request.contributor}</TableCell>
+                            <TableCell className="whitespace-nowrap">
+                              <div>
+                                <span className="font-semibold">{request.amount} {request.token}</span>
+                                <div className="text-sm text-muted-foreground">{request.estimatedValue}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                              <Badge variant="outline">{request.chain}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={getPriorityColor(request.priority)}>{request.priority}</Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate hidden md:table-cell">{request.description}</TableCell>
+                            <TableCell className="whitespace-nowrap hidden lg:table-cell">{new Date(request.requestedAt).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-1 md:space-x-2">
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-500 hover:bg-green-600 text-white h-8 w-8 p-0"
+                                  onClick={() => handleApprove(request.id)}
+                                  disabled={isProcessing}
+                                >
+                                  <Check className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="destructive"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleReject(request.id)}
+                                  disabled={isProcessing}
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hidden sm:flex">
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
